@@ -1,0 +1,14 @@
+{
+  "name": "멜버니의 걸음마",
+  "short_name": "멜버니",
+  "description": "우리 가족만의 성장 앨범",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FDF6EE",
+  "theme_color": "#F7C8C0",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

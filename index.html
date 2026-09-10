@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>멜버니의 걸음마</title>
+<meta name="theme-color" content="#F7C8C0">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-icon.png">
+<style>
+:root{
+  --cream:#FDF6EE; --cream2:#FAEDE0; --pink:#F2A9A0; --pink-d:#E96459;
+  --ink:#4A3B35; --sub:#9C8578; --white:#fff; --line:#F0DFCE;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Malgun Gothic',sans-serif;color:var(--ink)}
+body{background:var(--cream);padding-bottom:90px;-webkit-tap-highlight-color:transparent}
+/* ── 게이트 ── */
+#gate{position:fixed;inset:0;background:linear-gradient(160deg,#FDF3E7,#F9DDD6);display:flex;align-items:center;justify-content:center;z-index:100;padding:24px}
+#gate .box{background:var(--white);border-radius:24px;padding:36px 30px;max-width:340px;width:100%;text-align:center;box-shadow:0 10px 40px rgba(180,120,100,.15)}
+#gate h1{font-size:21px;color:var(--pink-d)}
+#gate .sub{font-size:13px;color:var(--sub);margin:8px 0 22px}
+#gate input{width:100%;padding:14px;border:2px solid var(--line);border-radius:14px;font-size:16px;text-align:center;letter-spacing:2px}
+#gate button{width:100%;margin-top:12px;padding:14px;background:var(--pink);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:bold}
+#gate .err{color:var(--pink-d);font-size:12px;margin-top:10px;display:none}
+/* ── 헤더 ── */
+header{background:linear-gradient(150deg,#F9DDD6,#FDF3E7);padding:22px 20px 18px;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line)}
+.h-row{display:flex;align-items:center;justify-content:space-between}
+h1.logo{font-size:18px;color:var(--pink-d)}
+.dday-box{text-align:right}
+.dday-num{font-size:22px;font-weight:bold;color:var(--pink-d)}
+.dday-lab{font-size:11px;color:var(--sub)}
+/* ── 탭 ── */
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);display:flex;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:20}
+nav button{flex:1;padding:12px 4px 10px;border:none;background:none;font-size:11.5px;color:var(--sub);font-weight:bold}
+nav button .ico{display:block;font-size:20px;margin-bottom:2px}
+nav button.on{color:var(--pink-d)}
+/* ── 뷰 ── */
+.view{display:none;padding:18px 16px;max-width:640px;margin:0 auto}
+.view.on{display:block}
+/* ── 홈(앨범) ── */
+.welcome{background:var(--white);border-radius:18px;padding:18px;margin-bottom:16px;border:1px solid var(--line)}
+.welcome .msg{font-size:14.5px;line-height:1.7}
+.welcome .msg b{color:var(--pink-d)}
+.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.photo-card{background:var(--white);border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.photo-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--cream2)}
+.photo-card .info{padding:10px 12px}
+.photo-card .date{font-size:11px;color:var(--sub)}
+.photo-card .memo{font-size:12.5px;margin-top:3px;line-height:1.5;word-break:break-all}
+.photo-card .dday-tag{display:inline-block;background:var(--cream2);color:var(--pink-d);font-size:10px;border-radius:10px;padding:2px 8px;margin-top:5px;font-weight:bold}
+.empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--sub);font-size:13.5px;line-height:1.8}
+/* ── 업로드 ── */
+.up-box{background:var(--white);border-radius:18px;padding:20px;border:1px solid var(--line)}
+.up-box h2{font-size:15px;color:var(--pink-d);margin-bottom:14px}
+.up-box label{font-size:12px;color:var(--sub);font-weight:bold;display:block;margin:12px 0 5px}
+#photoInput{display:none}
+.pick-btn{width:100%;padding:22px;border:2px dashed var(--pink);border-radius:16px;background:var(--cream);color:var(--pink-d);font-size:14px;font-weight:bold;text-align:center}
+#preview{width:100%;max-height:300px;object-fit:contain;border-radius:14px;margin-top:10px;display:none;background:var(--cream2)}
+textarea{width:100%;min-height:80px;border:2px solid var(--line);border-radius:14px;padding:12px;font-size:14px;resize:vertical;background:#FFFEFB}
+input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-radius:14px;font-size:14px;background:#FFFEFB}
+.submit-btn{width:100%;margin-top:18px;padding:15px;background:var(--pink);color:#fff;border:none;border-radius:16px;font-size:15px;font-weight:bold}
+.submit-btn:disabled{background:#DCC5BE}
+/* ── 일기 ── */
+.diary-item{background:var(--white);border-radius:16px;padding:16px;border:1px solid var(--line);margin-bottom:12px}
+.diary-item .d{font-size:11px;color:var(--sub);display:flex;justify-content:space-between}
+.diary-item .t{font-size:14px;margin-top:6px;line-height:1.7;white-space:pre-wrap}
+.diary-item .tag{font-size:10px;color:var(--pink-d);background:var(--cream2);border-radius:8px;padding:2px 8px;font-weight:bold}
+/* ── 달력 ── */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-head b{font-size:16px;color:var(--pink-d)}
+.cal-head button{background:none;border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-size:13px;color:var(--sub)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-dow{text-align:center;font-size:10.5px;color:var(--sub);padding:4px 0;font-weight:bold}
+.cal-cell{aspect-ratio:1;background:var(--white);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;border:1px solid var(--line);position:relative;overflow:hidden}
+.cal-cell .ph{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.cal-cell .n{position:relative;z-index:2;background:rgba(255,255,255,.75);border-radius:6px;padding:1px 5px;font-size:11px;font-weight:bold}
+.cal-cell.dim{opacity:.35}
+.cal-cell.today{border:2px solid var(--pink-d)}
+.cal-cell.born{background:var(--pink);color:#fff}
+.hint{font-size:11.5px;color:var(--sub);text-align:center;margin-top:14px;line-height:1.6}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 22px;border-radius:24px;font-size:13.5px;z-index:200;opacity:0;transition:opacity .3s;white-space:nowrap}
+.toast.show{opacity:.95}
+@media(max-width:400px){.gallery{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- ══ 비밀번호 게이트 ══ -->
+<div id="gate">
+  <div class="box">
+    <div style="font-size:44px">👣</div>
+    <h1>멜버니의 걸음마</h1>
+    <div class="sub">우리 가족만의 성장 앨범</div>
+    <input type="password" id="pwInput" placeholder="가족 비밀번호" autocomplete="off">
+    <button onclick="doLogin()">들어가기</button>
+    <div class="err" id="gateErr">비밀번호가 달라요</div>
+  </div>
+</div>
+
+<header>
+  <div class="h-row">
+    <h1 class="logo">👣 멜버니의 걸음마</h1>
+    <div class="dday-box">
+      <div class="dday-num" id="ddayNum">D-day</div>
+      <div class="dday-lab" id="ddayLab">2026.09.15 출생 예정</div>
+    </div>
+  </div>
+</header>
+
+<!-- ══ 앨범 ══ -->
+<div class="view on" id="v-album">
+  <div class="welcome">
+    <div class="msg" id="welcomeMsg"></div>
+  </div>
+  <div class="gallery" id="gallery"></div>
+</div>
+
+<!-- ══ 기록하기 ══ -->
+<div class="view" id="v-upload">
+  <div class="up-box">
+    <h2>📸 오늘의 멜버니</h2>
+    <label>사진</label>
+    <div class="pick-btn" onclick="document.getElementById('photoInput').click()">📷 사진 고르기</div>
+    <input type="file" id="photoInput" accept="image/*">
+    <img id="preview">
+    <label>같이 남길 말</label>
+    <textarea id="memoInput" placeholder="오늘 멜버니 이야기... (예: 처음으로 웃었어!)"></textarea>
+    <label>날짜</label>
+    <input type="date" id="dateInput">
+    <button class="submit-btn" id="submitBtn" onclick="doUpload()">앨범에 담기 💗</button>
+  </div>
+  <p class="hint">사진은 가족 비밀번호를 아는 사람만 볼 수 있어요</p>
+</div>
+
+<!-- ══ 성장일기 ══ -->
+<div class="view" id="v-diary">
+  <div class="up-box" style="margin-bottom:14px">
+    <h2>✏️ 오늘의 일기</h2>
+    <textarea id="diaryInput" placeholder="오늘 있었던 일, 느낌... 짧게라도"></textarea>
+    <button class="submit-btn" onclick="doDiary()">일기 쓰기</button>
+  </div>
+  <div id="diaryList"></div>
+</div>
+
+<!-- ══ 달력 ══ -->
+<div class="view" id="v-cal">
+  <div class="cal-head">
+    <button onclick="calMove(-1)">◀ 이전</button>
+    <b id="calTitle">2026.09</b>
+    <button onclick="calMove(1)">다음 ▶</button>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+  <p class="hint">사진을 올린 날은 날짜 위에 사진이 보여요<br>💗 표시는 멜버니가 온 날</p>
+</div>
+
+<nav>
+  <button class="on" onclick="showTab('album')"><span class="ico">📖</span>앨범</button>
+  <button onclick="showTab('upload')"><span class="ico">📸</span>기록</button>
+  <button onclick="showTab('diary')"><span class="ico">✏️</span>일기</button>
+  <button onclick="showTab('cal')"><span class="ico">🗓️</span>달력</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════ 설정 ═══════════
+const SUPA_URL = '';   // 형이 SQL 실행 후 키 받으면 채움 (지금은 로컬 임시 모드)
+const SUPA_KEY = '';
+const BIRTH = new Date('2026-09-15');
+const FAMILY_PW = 'melbourny2026';  // 가족 비밀번호 (변경 가능)
+
+const DB_ON = !!(SUPA_URL && SUPA_KEY);
+const H = SUPA_KEY ? {'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json'} : {};
+
+// ═══════════ D+day ═══════════
+function dday(){
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diff = Math.floor((today - BIRTH) / 86400000);
+  const el = document.getElementById('ddayNum');
+  if (diff < 0) {
+    el.textContent = 'D' + diff;  // D-5
+    document.getElementById('ddayLab').textContent = '2026.09.15 만나는 날';
+    document.getElementById('welcomeMsg').innerHTML = '멜버니를 만나기까지 <b>' + Math.abs(diff) + '일</b> 남았어요. 🍼<br>조금만 기다리면 첫 발자국이 찍혀요.';
+  } else {
+    el.textContent = 'D+' + diff;
+    document.getElementById('ddayLab').textContent = '2026.09.15 우리 만난 날';
+    document.getElementById('welcomeMsg').innerHTML = '멜버니가 우리에게 온 지 <b>' + (diff + 1) + '일째</b>예요. 💗<br>오늘도 멜버니의 걸음마를 기록해요.';
+  }
+}
+
+// ═══════════ 게이트 ═══════════
+function doLogin(){
+  const v = document.getElementById('pwInput').value;
+  if (v === FAMILY_PW) {
+    sessionStorage.setItem('mel_auth', '1');
+    document.getElementById('gate').style.display = 'none';
+    init();
+  } else {
+    document.getElementById('gateErr').style.display = 'block';
+  }
+}
+document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ═══════════ 탭 ═══════════
+function showTab(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  document.getElementById('v-' + name).classList.add('on');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
+  event.currentTarget.classList.add('on');
+  if (name === 'cal') renderCal();
+  if (name === 'diary') renderDiary();
+}
+
+// ═══════════ 데이터 (서버 or 로컬) ═══════════
+let PHOTOS = [], DIARY = [];
+async function loadData(){
+  if (!DB_ON) {
+    PHOTOS = JSON.parse(localStorage.getItem('mel_photos') || '[]');
+    DIARY = JSON.parse(localStorage.getItem('mel_diary') || '[]');
+  } else {
+    try {
+      const r = await fetch(SUPA_URL + '/rest/v1/mel_photos?order=created_at.desc&limit=200', {headers: H});
+      if (r.ok) PHOTOS = await r.json();
+      const r2 = await fetch(SUPA_URL + '/rest/v1/mel_diary?order=created_at.desc&limit=200', {headers: H});
+      if (r2.ok) DIARY = await r2.json();
+    } catch (e) { /* 오프라인 폴백 */ }
+  }
+  renderGallery();
+}
+
+// ═══════════ 업로드 ═══════════
+let pickedFile = null, pickedDataUrl = null;
+document.getElementById('photoInput').addEventListener('change', function(){
+  const f = this.files[0];
+  if (!f) return;
+  pickedFile = f;
+  const rd = new FileReader();
+  rd.onload = e => {
+    // 리사이즈 (모바일 사진 3~10MB → 1200px로)
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      const max = 1200;
+      let w = img.width, h = img.height;
+      if (w > max || h > max) {
+        if (w > h) { h = h * max / w; w = max; } else { w = w * max / h; h = max; }
+      }
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      pickedDataUrl = c.toDataURL('image/jpeg', 0.85);
+      const pv = document.getElementById('preview');
+      pv.src = pickedDataUrl; pv.style.display = 'block';
+      document.querySelector('.pick-btn').textContent = '📷 다시 고르기';
+    };
+    img.src = e.target.result;
+  };
+  rd.readAsDataURL(f);
+});
+
+async function doUpload(){
+  const btn = document.getElementById('submitBtn');
+  const dateVal = document.getElementById('dateInput').value || new Date().toISOString().slice(0, 10);
+  const memo = document.getElementById('memoInput').value.trim();
+  if (!pickedDataUrl) { toast('사진을 먼저 골라주세요 📷'); return; }
+  btn.disabled = true; btn.textContent = '담는 중... 💗';
+  try {
+    if (DB_ON) {
+      const r = await fetch(SUPA_URL + '/rest/v1/mel_photos', {
+        method: 'POST', headers: H,
+        body: JSON.stringify({photo_date: dateVal, memo: memo || null, image_data: pickedDataUrl})
+      });
+      if (!r.ok) throw new Error('save fail');
+    }
+    const item = {photo_date: dateVal, memo: memo || '', image_data: pickedDataUrl, created_at: new Date().toISOString()};
+    PHOTOS.unshift(item);
+    localStorage.setItem('mel_photos', JSON.stringify(PHOTOS.slice(0, 100)));
+    renderGallery();
+    // 폼 초기화
+    pickedFile = null; pickedDataUrl = null;
+    document.getElementById('preview').style.display = 'none';
+    document.getElementById('memoInput').value = '';
+    document.querySelector('.pick-btn').textContent = '📷 사진 고르기';
+    document.getElementById('photoInput').value = '';
+    toast('앨범에 담았어요 💗');
+    showTab('album');
+    document.querySelector('nav button').click();
+  } catch (e) {
+    toast('저장에 실패했어요 — 다시 시도');
+  }
+  btn.disabled = false; btn.textContent = '앨범에 담기 💗';
+}
+
+// ═══════════ 일기 ═══════════
+async function doDiary(){
+  const t = document.getElementById('diaryInput').value.trim();
+  if (!t) { toast('한 마디라도 적어주세요 ✏️'); return; }
+  const item = {text: t, created_at: new Date().toISOString()};
+  if (DB_ON) {
+    try {
+      const r = await fetch(SUPA_URL + '/rest/v1/mel_diary', {
+        method: 'POST', headers: H, body: JSON.stringify({text: t})
+      });
+      if (!r.ok) throw 0;
+    } catch (e) { toast('저장 실패'); return; }
+  }
+  DIARY.unshift(item);
+  localStorage.setItem('mel_diary', JSON.stringify(DIARY.slice(0, 200)));
+  document.getElementById('diaryInput').value = '';
+  toast('기록했어요 ✏️');
+  renderDiary();
+}
+
+// ═══════════ 렌더 ═══════════
+function renderGallery(){
+  const g = document.getElementById('gallery');
+  if (!PHOTOS.length) {
+    g.innerHTML = '<div class="empty">아직 사진이 없어요 🌱<br><b>기록</b> 탭에서 첫 사진을 올려주세요!</div>';
+    return;
+  }
+  g.innerHTML = PHOTOS.map(p => {
+    const d = (p.photo_date || '').replaceAll('-', '.');
+    const diff = ddayOf(p.photo_date);
+    const tag = diff < 0 ? 'D' + diff : (diff === 0 ? '🎉 태어난 날!' : 'D+' + diff);
+    return `<div class="photo-card"><img src="${p.image_data}" loading="lazy" onclick="viewPhoto('${(p.id||'')}')" onerror="this.src=placeholder">
+      <div class="info"><div class="date">${d}</div>${p.memo ? `<div class="memo">${esc(p.memo)}</div>` : ''}<span class="dday-tag">${tag}</span></div></div>`;
+  }).join('');
+}
+function renderDiary(){
+  const el = document.getElementById('diaryList');
+  if (!DIARY.length) { el.innerHTML = '<div class="empty">첫 일기를 남겨보세요 ✏️</div>'; return; }
+  el.innerHTML = DIARY.map(d => {
+    const dt = (d.created_at || '').slice(0, 10).replaceAll('-', '.');
+    const diff = ddayOf(dt);
+    return `<div class="diary-item"><div class="d"><span>${dt}</span><span class="tag">${diff < 0 ? 'D' + diff : 'D+' + diff}</span></div><div class="t">${esc(d.text)}</div></div>`;
+  }).join('');
+}
+
+// 달력
+let calY, calM;
+function calMove(d){ calM += d; if (calM < 0) { calM = 11; calY--; } if (calM > 11) { calM = 0; calY++; } renderCal(); }
+function renderCal(){
+  if (calY === undefined) { const n = new Date(); calY = n.getFullYear(); calM = n.getMonth(); }
+  document.getElementById('calTitle').textContent = calY + '.' + String(calM + 1).padStart(2, '0');
+  const first = new Date(calY, calM, 1).getDay();
+  const days = new Date(calY, calM + 1, 0).getDate();
+  const photoMap = {};
+  PHOTOS.forEach(p => { const k = (p.photo_date || ''); if (!photoMap[k]) photoMap[k] = p.image_data; });
+  const today = new Date();
+  let html = ['일','월','화','수','목','금','토'].map(d => `<div class="cal-dow">${d}</div>`).join('');
+  for (let i = 0; i < first; i++) html += '<div class="cal-cell dim"></div>';
+  for (let d = 1; d <= days; d++) {
+    const key = calY + '-' + String(calM + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const ph = photoMap[key];
+    const isToday = today.getFullYear() === calY && today.getMonth() === calM && today.getDate() === d;
+    const isBorn = key === '2026-09-15';
+    html += `<div class="cal-cell${isToday ? ' today' : ''}${isBorn ? ' born' : ''}">${ph ? `<img class="ph" src="${ph}" loading="lazy">` : (isBorn ? '💗' : '')}<span class="n">${d}</span></div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+// ═══════════ 유틸 ═══════════
+function ddayOf(dateStr){
+  if (!dateStr) return 0;
+  const d = new Date(dateStr);
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return Math.floor((t - BIRTH) / 86400000);
+}
+function esc(s){ return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+function viewPhoto(id){ /* 확대 뷰어 (다음 버전) */ }
+
+// ═══════════ 시작 ═══════════
+function init(){
+  dday();
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('dateInput').value = today;
+  document.getElementById('dateInput').max = today;
+  loadData();
+}
+// 세션 유지 (하루 동안 로그인 기억)
+if (sessionStorage.getItem('mel_auth') === '1') {
+  document.getElementById('gate').style.display = 'none';
+  init();
+}
+</script>
+</body>
+</html>
