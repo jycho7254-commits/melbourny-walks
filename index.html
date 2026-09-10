@@ -97,6 +97,10 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 #dayModal .m-diary .dt{font-size:11px;color:var(--sub);margin-bottom:3px}
 #dayModal .m-empty{text-align:center;color:var(--sub);font-size:13px;padding:30px 0;line-height:1.7}
 #dayModal .share-btn{width:100%;margin-top:8px;padding:13px;background:var(--pink);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:bold}
+/* ── 삭제 버튼 ── */
+.del-btn{width:100%;border:none;border-top:1px solid var(--line);background:var(--white);color:#C77F74;font-size:11.5px;font-weight:bold;padding:8px;cursor:pointer}
+.diary-item .del-btn{width:auto;border:none;background:var(--cream2);border-radius:8px;padding:4px 10px;margin-top:8px;font-size:11px;color:#C77F74;font-weight:bold}
+
 /* ── 카드 공유/플레이 버튼 ── */
 .media-wrap{position:relative}
 .play-badge{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:10px;padding:3px 8px;font-size:10.5px;z-index:3}
@@ -212,13 +216,13 @@ function dday(){
   const diff = Math.floor((today - BIRTH) / 86400000);
   const el = document.getElementById('ddayNum');
   if (diff < 0) {
-    el.textContent = 'D' + diff;  // D-5
+    el.textContent = 'D-' + Math.abs(diff);  // D-5
     document.getElementById('ddayLab').textContent = '2026.09.15 만나는 날';
     document.getElementById('welcomeMsg').innerHTML = '멜버니를 만나기까지 <b>' + Math.abs(diff) + '일</b> 남았어요. 🍼<br>조금만 기다리면 첫 발자국이 찍혀요.';
   } else {
     el.textContent = 'D+' + diff;
     document.getElementById('ddayLab').textContent = '2026.09.15 우리 만난 날';
-    document.getElementById('welcomeMsg').innerHTML = '멜버니가 우리에게 온 지 <b>' + (diff + 1) + '일째</b>예요. 💗<br>오늘도 멜버니의 걸음마를 기록해요.';
+    document.getElementById('welcomeMsg').innerHTML = '멜버니랑 <b>' + (diff + 1) + '일</b> 💗<br>오늘도 멜버니의 걸음마를 기록해요.';
   }
 }
 
@@ -315,11 +319,18 @@ async function doUpload(){
   btn.disabled = true; btn.textContent = '담는 중... 💗';
   try {
     if (DB_ON) {
-      const r = await fetch(SUPA_URL + '/rest/v1/mel_photos', {
+      let r = await fetch(SUPA_URL + '/rest/v1/mel_photos', {
         method: 'POST', headers: H,
         body: JSON.stringify({photo_date: dateVal, memo: memo || null, image_data: pickedDataUrl, kind: isVideo ? 'video' : 'photo'})
       });
-      if (!r.ok) throw new Error('save fail');
+      if (!r.ok && r.status === 400) {
+        // kind 컬럼 미지원(스키마 이전) — kind 없이 재시도
+        r = await fetch(SUPA_URL + '/rest/v1/mel_photos', {
+          method: 'POST', headers: H,
+          body: JSON.stringify({photo_date: dateVal, memo: memo || null, image_data: pickedDataUrl})
+        });
+      }
+      if (!r.ok) throw new Error('save fail ' + r.status);
     }
     const item = {photo_date: dateVal, memo: memo || '', image_data: pickedDataUrl, kind: isVideo ? 'video' : 'photo', created_at: new Date().toISOString()};
     PHOTOS.unshift(item);
@@ -390,7 +401,8 @@ function renderGallery(){
     return `<div class="photo-card"><div class="media-wrap" onclick="openDay('${p.photo_date}')">${media}
       ${vid ? '<span class="play-badge">▶ 동영상</span>' : ''}
       <button class="share-ico" onclick="event.stopPropagation();shareItem(${i})">🔗</button></div>
-      <div class="info" onclick="openDay('${p.photo_date}')"><div class="date">${d}</div>${p.memo ? `<div class="memo">${esc(p.memo)}</div>` : ''}<span class="dday-tag">${tag}</span></div></div>`;
+      <div class="info" onclick="openDay('${p.photo_date}')"><div class="date">${d}</div>${p.memo ? `<div class="memo">${esc(p.memo)}</div>` : ''}<span class="dday-tag">${tag}</span></div>
+      <button class="del-btn" onclick="event.stopPropagation();delPhoto(${i})">삭제</button></div>`;
   }).join('');
 }
 function renderDiary(){
@@ -399,7 +411,7 @@ function renderDiary(){
   el.innerHTML = DIARY.map(d => {
     const dt = (d.created_at || '').slice(0, 10).replaceAll('-', '.');
     const diff = ddayOf(dt);
-    return `<div class="diary-item"><div class="d"><span>${dt}</span><span class="tag">${diff < 0 ? 'D' + diff : 'D+' + diff}</span></div><div class="t">${esc(d.text)}</div></div>`;
+    return `<div class="diary-item"><div class="d"><span>${dt}</span><span class="tag">${diff < 0 ? 'D' + diff : 'D+' + diff}</span></div><div class="t">${esc(d.text)}</div><button class="del-btn" onclick="delDiary(${DIARY.indexOf(d)})">삭제</button></div>`;
   }).join('');
 }
 
@@ -459,6 +471,39 @@ function closeDay(){
   document.getElementById('dayModal').classList.remove('show');
   document.querySelectorAll('#mBody video').forEach(v => v.pause());
 }
+// ═══════════ 삭제 ═══════════
+async function delPhoto(idx){
+  const p = PHOTOS[idx];
+  if (!p) return;
+  if (!confirm('이 사진을 삭제할까요? 되돌릴 수 없어요')) return;
+  if (DB_ON && p.id) {
+    try {
+      const r = await fetch(SUPA_URL + '/rest/v1/mel_photos?id=eq.' + p.id, {method: 'DELETE', headers: H});
+      if (!r.ok) { toast('서버 삭제 실패 — 다시 시도'); return; }
+    } catch (e) { toast('네트워크 오류'); return; }
+  }
+  PHOTOS.splice(idx, 1);
+  localStorage.setItem('mel_photos', JSON.stringify(PHOTOS.slice(0, 100)));
+  renderGallery();
+  renderCal();
+  toast('삭제했어요');
+}
+async function delDiary(idx){
+  const d = DIARY[idx];
+  if (!d) return;
+  if (!confirm('이 일기를 삭제할까요?')) return;
+  if (DB_ON && d.id) {
+    try {
+      const r = await fetch(SUPA_URL + '/rest/v1/mel_diary?id=eq.' + d.id, {method: 'DELETE', headers: H});
+      if (!r.ok) { toast('서버 삭제 실패'); return; }
+    } catch (e) { toast('네트워크 오류'); return; }
+  }
+  DIARY.splice(idx, 1);
+  localStorage.setItem('mel_diary', JSON.stringify(DIARY.slice(0, 200)));
+  renderDiary();
+  toast('삭제했어요');
+}
+
 // ═══════════ 공유 (카톡 등 — Web Share API) ═══════════
 async function shareItem(idx){
   const p = PHOTOS[idx];
@@ -504,6 +549,8 @@ function viewPhoto(id){ /* 확대 뷰어 (다음 버전) */ }
 // ═══════════ 시작 ═══════════
 function init(){
   dday();
+  clearInterval(window._ddayTimer);
+  window._ddayTimer = setInterval(dday, 60000);
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById('dateInput').value = today;
   document.getElementById('dateInput').max = today;
