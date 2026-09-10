@@ -14,6 +14,7 @@
   --ink:#4A3B35; --sub:#9C8578; --white:#fff; --line:#F0DFCE;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Malgun Gothic',sans-serif;color:var(--ink)}
+html,body{max-width:100vw;overflow-x:hidden}
 body{background:var(--cream);padding-bottom:90px;-webkit-tap-highlight-color:transparent}
 /* ── 게이트 ── */
 #gate{position:fixed;inset:0;background:linear-gradient(160deg,#FDF3E7,#F9DDD6);display:flex;align-items:center;justify-content:center;z-index:100;padding:24px}
@@ -44,7 +45,7 @@ nav button.on{color:var(--pink-d)}
 .welcome .msg b{color:var(--pink-d)}
 .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .photo-card{background:var(--white);border-radius:16px;overflow:hidden;border:1px solid var(--line)}
-.photo-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--cream2)}
+.photo-card img,.photo-card video{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--cream2)}
 .photo-card .info{padding:10px 12px}
 .photo-card .date{font-size:11px;color:var(--sub)}
 .photo-card .memo{font-size:12.5px;margin-top:3px;line-height:1.5;word-break:break-all}
@@ -81,6 +82,25 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .hint{font-size:11.5px;color:var(--sub);text-align:center;margin-top:14px;line-height:1.6}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 22px;border-radius:24px;font-size:13.5px;z-index:200;opacity:0;transition:opacity .3s;white-space:nowrap}
 .toast.show{opacity:.95}
+/* ── 날짜 팝업 ── */
+#dayModal{position:fixed;inset:0;background:rgba(60,40,30,.55);z-index:150;display:none;align-items:flex-end;justify-content:center}
+#dayModal.show{display:flex}
+#dayModal .sheet{background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:640px;max-height:82vh;overflow-y:auto;padding:20px 18px 34px;animation:up .25s ease}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+#dayModal .m-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;position:sticky;top:-20px;background:var(--white);padding:8px 0}
+#dayModal .m-title{font-size:16px;font-weight:bold;color:var(--pink-d)}
+#dayModal .m-close{background:var(--cream2);border:none;border-radius:50%;width:32px;height:32px;font-size:15px;color:var(--sub)}
+#dayModal .m-media{width:100%;border-radius:14px;display:block;margin-bottom:10px;background:#000}
+#dayModal .m-media.video{max-height:60vh}
+#dayModal .m-memo{font-size:14px;line-height:1.7;background:var(--cream);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+#dayModal .m-diary{font-size:13.5px;line-height:1.7;border-left:3px solid var(--pink);padding:8px 12px;margin-bottom:10px;color:var(--ink)}
+#dayModal .m-diary .dt{font-size:11px;color:var(--sub);margin-bottom:3px}
+#dayModal .m-empty{text-align:center;color:var(--sub);font-size:13px;padding:30px 0;line-height:1.7}
+#dayModal .share-btn{width:100%;margin-top:8px;padding:13px;background:var(--pink);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:bold}
+/* ── 카드 공유/플레이 버튼 ── */
+.media-wrap{position:relative}
+.play-badge{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:10px;padding:3px 8px;font-size:10.5px;z-index:3}
+.share-ico{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.85);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;z-index:3;cursor:pointer}
 @media(max-width:400px){.gallery{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -121,9 +141,10 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
   <div class="up-box">
     <h2>📸 오늘의 멜버니</h2>
     <label>사진</label>
-    <div class="pick-btn" onclick="document.getElementById('photoInput').click()">📷 사진 고르기</div>
-    <input type="file" id="photoInput" accept="image/*">
+    <div class="pick-btn" onclick="document.getElementById('photoInput').click()">📷📸 사진/동영상 고르기</div>
+    <input type="file" id="photoInput" accept="image/*,video/*">
     <img id="preview">
+    <video id="vidPreview" controls playsinline style="width:100%;max-height:300px;border-radius:14px;margin-top:10px;display:none;background:#000"></video>
     <label>같이 남길 말</label>
     <textarea id="memoInput" placeholder="오늘 멜버니 이야기... (예: 처음으로 웃었어!)"></textarea>
     <label>날짜</label>
@@ -152,6 +173,17 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
   </div>
   <div class="cal-grid" id="calGrid"></div>
   <p class="hint">사진을 올린 날은 날짜 위에 사진이 보여요<br>💗 표시는 멜버니가 온 날</p>
+</div>
+
+<!-- ══ 날짜 상세 팝업 ══ -->
+<div id="dayModal" onclick="if(event.target===this)closeDay()">
+  <div class="sheet">
+    <div class="m-head">
+      <span class="m-title" id="mTitle"></span>
+      <button class="m-close" onclick="closeDay()">✕</button>
+    </div>
+    <div id="mBody"></div>
+  </div>
 </div>
 
 <nav>
@@ -232,10 +264,26 @@ async function loadData(){
 
 // ═══════════ 업로드 ═══════════
 let pickedFile = null, pickedDataUrl = null;
+let isVideo = false;
 document.getElementById('photoInput').addEventListener('change', function(){
   const f = this.files[0];
   if (!f) return;
   pickedFile = f;
+  isVideo = f.type.startsWith('video/');
+  if (isVideo) {
+    if (f.size > 30 * 1024 * 1024) { toast('동영상은 30MB까지 올릴 수 있어요 🎬'); resetPicker(); return; }
+    const rd = new FileReader();
+    rd.onload = e => {
+      pickedDataUrl = e.target.result;
+      const pv = document.getElementById('preview');
+      pv.src = pickedDataUrl; pv.style.display = 'none';
+      const wrap = document.getElementById('vidPreview');
+      wrap.src = pickedDataUrl; wrap.style.display = 'block';
+      document.querySelector('.pick-btn').textContent = '🎬 동영상 선택됨 — 다시 고르기';
+    };
+    rd.readAsDataURL(f);
+    return;
+  }
   const rd = new FileReader();
   rd.onload = e => {
     // 리사이즈 (모바일 사진 3~10MB → 1200px로)
@@ -269,19 +317,21 @@ async function doUpload(){
     if (DB_ON) {
       const r = await fetch(SUPA_URL + '/rest/v1/mel_photos', {
         method: 'POST', headers: H,
-        body: JSON.stringify({photo_date: dateVal, memo: memo || null, image_data: pickedDataUrl})
+        body: JSON.stringify({photo_date: dateVal, memo: memo || null, image_data: pickedDataUrl, kind: isVideo ? 'video' : 'photo'})
       });
       if (!r.ok) throw new Error('save fail');
     }
-    const item = {photo_date: dateVal, memo: memo || '', image_data: pickedDataUrl, created_at: new Date().toISOString()};
+    const item = {photo_date: dateVal, memo: memo || '', image_data: pickedDataUrl, kind: isVideo ? 'video' : 'photo', created_at: new Date().toISOString()};
     PHOTOS.unshift(item);
     localStorage.setItem('mel_photos', JSON.stringify(PHOTOS.slice(0, 100)));
     renderGallery();
     // 폼 초기화
-    pickedFile = null; pickedDataUrl = null;
+    pickedFile = null; pickedDataUrl = null; isVideo = false;
     document.getElementById('preview').style.display = 'none';
+    document.getElementById('vidPreview').style.display = 'none';
+    document.getElementById('vidPreview').removeAttribute('src');
     document.getElementById('memoInput').value = '';
-    document.querySelector('.pick-btn').textContent = '📷 사진 고르기';
+    document.querySelector('.pick-btn').textContent = '📷📸 사진/동영상 고르기';
     document.getElementById('photoInput').value = '';
     toast('앨범에 담았어요 💗');
     showTab('album');
@@ -329,12 +379,18 @@ function renderGallery(){
     g.innerHTML = '<div class="empty">아직 사진이 없어요 🌱<br><b>기록</b> 탭에서 첫 사진을 올려주세요!</div>';
     return;
   }
-  g.innerHTML = PHOTOS.map(p => {
+  g.innerHTML = PHOTOS.map((p, i) => {
     const d = (p.photo_date || '').replaceAll('-', '.');
     const diff = ddayOf(p.photo_date);
     const tag = diff < 0 ? 'D' + diff : (diff === 0 ? '🎉 태어난 날!' : 'D+' + diff);
-    return `<div class="photo-card"><img src="${p.image_data}" loading="lazy" onclick="viewPhoto('${(p.id||'')}')" onerror="this.src=placeholder">
-      <div class="info"><div class="date">${d}</div>${p.memo ? `<div class="memo">${esc(p.memo)}</div>` : ''}<span class="dday-tag">${tag}</span></div></div>`;
+    const vid = p.kind === 'video';
+    const media = vid
+      ? `<video src="${p.image_data}" preload="metadata" muted></video>`
+      : `<img src="${p.image_data}" loading="lazy">`;
+    return `<div class="photo-card"><div class="media-wrap" onclick="openDay('${p.photo_date}')">${media}
+      ${vid ? '<span class="play-badge">▶ 동영상</span>' : ''}
+      <button class="share-ico" onclick="event.stopPropagation();shareItem(${i})">🔗</button></div>
+      <div class="info" onclick="openDay('${p.photo_date}')"><div class="date">${d}</div>${p.memo ? `<div class="memo">${esc(p.memo)}</div>` : ''}<span class="dday-tag">${tag}</span></div></div>`;
   }).join('');
 }
 function renderDiary(){
@@ -365,9 +421,69 @@ function renderCal(){
     const ph = photoMap[key];
     const isToday = today.getFullYear() === calY && today.getMonth() === calM && today.getDate() === d;
     const isBorn = key === '2026-09-15';
-    html += `<div class="cal-cell${isToday ? ' today' : ''}${isBorn ? ' born' : ''}">${ph ? `<img class="ph" src="${ph}" loading="lazy">` : (isBorn ? '💗' : '')}<span class="n">${d}</span></div>`;
+    html += `<div class="cal-cell${isToday ? ' today' : ''}${isBorn ? ' born' : ''}" style="cursor:pointer" onclick="openDay('${key}')">${ph ? `<img class="ph" src="${ph}" loading="lazy">` : (isBorn ? '💗' : '')}<span class="n">${d}</span></div>`;
   }
   document.getElementById('calGrid').innerHTML = html;
+}
+
+// ═══════════ 날짜 팝업 ═══════════
+function openDay(dateKey){
+  if (!dateKey) return;
+  const photos = PHOTOS.filter(p => p.photo_date === dateKey);
+  const diaries = DIARY.filter(d => (d.created_at || '').slice(0, 10) === dateKey);
+  const diff = ddayOf(dateKey);
+  const dLabel = dateKey.replaceAll('-', '.');
+  const dTag = diff < 0 ? 'D' + diff : (diff === 0 ? '🎉 태어난 날' : 'D+' + diff);
+  document.getElementById('mTitle').textContent = dLabel + ' · ' + dTag;
+  let html = '';
+  if (!photos.length && !diaries.length) {
+    html = `<div class="m-empty">이 날에는 기록이 없어요 🌱<br>기록 탭에서 이 날짜로 남겨볼 수 있어요</div>`;
+  } else {
+    photos.forEach(p => {
+      const vid = p.kind === 'video';
+      const media = vid
+        ? `<video class="m-media video" src="${p.image_data}" controls playsinline></video>`
+        : `<img class="m-media" src="${p.image_data}">`;
+      html += media;
+      if (p.memo) html += `<div class="m-memo">${esc(p.memo)}</div>`;
+    });
+    diaries.forEach(d => {
+      html += `<div class="m-diary"><div class="dt">✏️ 일기</div>${esc(d.text)}</div>`;
+    });
+    if (photos.length) html += `<button class="share-btn" onclick="shareDay('${dateKey}')">🔗 이 날 사진 공유하기</button>`;
+  }
+  document.getElementById('mBody').innerHTML = html;
+  document.getElementById('dayModal').classList.add('show');
+}
+function closeDay(){
+  document.getElementById('dayModal').classList.remove('show');
+  document.querySelectorAll('#mBody video').forEach(v => v.pause());
+}
+// ═══════════ 공유 (카톡 등 — Web Share API) ═══════════
+async function shareItem(idx){
+  const p = PHOTOS[idx];
+  if (!p) return;
+  const dTag = ddayOf(p.photo_date);
+  const label = (p.memo ? p.memo + ' — ' : '') + (p.photo_date || '') + (dTag >= 0 ? ' (D+' + dTag + ')' : ' (D' + dTag + ')');
+  try {
+    // 사진 파일로 공유 시도 (카톡에서 사진 바로 전송)
+    const blob = await (await fetch(p.image_data)).blob();
+    const ext = p.kind === 'video' ? 'mp4' : 'jpg';
+    const file = new File([blob], 'melbourny.' + ext, {type: blob.type});
+    if (navigator.canShare && navigator.canShare({files: [file]})) {
+      await navigator.share({files: [file], text: label + ' — 멜버니의 걸음마 👣'});
+      return;
+    }
+  } catch (e) { /* 파일 공유 실패 시 텍스트로 */ }
+  try {
+    if (navigator.share) { await navigator.share({title: '멜버니의 걸음마 👣', text: label}); }
+    else { await navigator.clipboard.writeText(label); toast('복사했어요 — 카톡에 붙여넣기 하세요 💗'); }
+  } catch (e) {}
+}
+async function shareDay(dateKey){
+  const photos = PHOTOS.filter(p => p.photo_date === dateKey);
+  if (!photos.length) return;
+  await shareItem(PHOTOS.indexOf(photos[0]));
 }
 
 // ═══════════ 유틸 ═══════════
