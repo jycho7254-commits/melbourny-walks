@@ -203,7 +203,7 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 // ═══════════ 설정 ═══════════
 const SUPA_URL = 'https://puuiviiiltxagoebruuq.supabase.co';
 const SUPA_KEY = 'sb_publishable_qsHOcy9rnJxhR1jpcRcVFA_7WNMfzWI';
-const BIRTH = new Date('2026-09-15');
+const BIRTH = new Date(2026, 8, 15);  // 2026-09-15 로컬 자정 (8=9월, 0-indexed) — UTC 9시간 오차 방지
 const FAMILY_PW = '260915';  // 가족 비밀번호 (변경 가능)
 
 const DB_ON = !!(SUPA_URL && SUPA_KEY);
@@ -213,7 +213,7 @@ const H = SUPA_KEY ? {'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY,
 function dday(){
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diff = Math.floor((today - BIRTH) / 86400000);
+  const diff = Math.round((today - BIRTH) / 86400000);
   const el = document.getElementById('ddayNum');
   if (diff < 0) {
     el.textContent = 'D-' + Math.abs(diff);  // D-5
@@ -534,9 +534,9 @@ async function shareDay(dateKey){
 // ═══════════ 유틸 ═══════════
 function ddayOf(dateStr){
   if (!dateStr) return 0;
-  const d = new Date(dateStr);
-  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  return Math.floor((t - BIRTH) / 86400000);
+  const parts = dateStr.split('-').map(Number);
+  const t = new Date(parts[0], parts[1] - 1, parts[2]);  // 로컬 자정
+  return Math.round((t - BIRTH) / 86400000);
 }
 function esc(s){ return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function toast(msg){
