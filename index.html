@@ -210,7 +210,7 @@ function showTab(name){
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
   event.currentTarget.classList.add('on');
   if (name === 'cal') renderCal();
-  if (name === 'diary') renderDiary();
+  if (name === 'diary') refreshDiary();
 }
 
 // ═══════════ 데이터 (서버 or 로컬) ═══════════
@@ -309,6 +309,16 @@ async function doDiary(){
   localStorage.setItem('mel_diary', JSON.stringify(DIARY.slice(0, 200)));
   document.getElementById('diaryInput').value = '';
   toast('기록했어요 ✏️');
+  renderDiary();
+}
+
+async function refreshDiary(){
+  if (DB_ON) {
+    try {
+      const r = await fetch(SUPA_URL + '/rest/v1/mel_diary?order=created_at.desc&limit=200', {headers: H});
+      if (r.ok) { DIARY = await r.json(); localStorage.setItem('mel_diary', JSON.stringify(DIARY.slice(0,200))); }
+    } catch (e) {}
+  }
   renderDiary();
 }
 
