@@ -275,7 +275,7 @@ document.getElementById('photoInput').addEventListener('change', function(){
   pickedFile = f;
   isVideo = f.type.startsWith('video/');
   if (isVideo) {
-    if (f.size > 30 * 1024 * 1024) { toast('동영상은 30MB까지 올릴 수 있어요 🎬'); resetPicker(); return; }
+    if (f.size > 20 * 1024 * 1024) { toast('동영상은 20MB까지 올릴 수 있어요 — 폰 카메라 설정에서 화질 낮추면 더 많이 담겨요 🎬'); resetPicker(); return; }
     const rd = new FileReader();
     rd.onload = e => {
       pickedDataUrl = e.target.result;
@@ -294,14 +294,14 @@ document.getElementById('photoInput').addEventListener('change', function(){
     const img = new Image();
     img.onload = () => {
       const c = document.createElement('canvas');
-      const max = 1200;
+      const max = 1000;
       let w = img.width, h = img.height;
       if (w > max || h > max) {
         if (w > h) { h = h * max / w; w = max; } else { w = w * max / h; h = max; }
       }
       c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
-      pickedDataUrl = c.toDataURL('image/jpeg', 0.85);
+      pickedDataUrl = c.toDataURL('image/jpeg', 0.78);
       const pv = document.getElementById('preview');
       pv.src = pickedDataUrl; pv.style.display = 'block';
       document.querySelector('.pick-btn').textContent = '📷 다시 고르기';
@@ -549,8 +549,14 @@ function viewPhoto(id){ /* 확대 뷰어 (다음 버전) */ }
 // ═══════════ 시작 ═══════════
 function init(){
   dday();
-  clearInterval(window._ddayTimer);
-  window._ddayTimer = setInterval(dday, 60000);
+  // 1분마다 갱신 + 자정 정각에 갱신 + 앱 재진입 시 갱신
+  clearInterval(window._ddTimer);
+  window._ddTimer = setInterval(dday, 60000);
+  clearTimeout(window._ddMidnight);
+  const now = new Date();
+  const mid = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 5);
+  window._ddMidnight = setTimeout(() => { dday(); init(); }, mid - now);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) dday(); });
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById('dateInput').value = today;
   document.getElementById('dateInput').max = today;
