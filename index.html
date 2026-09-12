@@ -321,15 +321,8 @@ async function doUpload(){
     if (DB_ON) {
       let r = await fetch(SUPA_URL + '/rest/v1/mel_photos', {
         method: 'POST', headers: H,
-        body: JSON.stringify({photo_date: dateVal, memo: memo || null, image_data: pickedDataUrl, kind: isVideo ? 'video' : 'photo'})
+        body: JSON.stringify({photo_date: dateVal, memo: memo || null, image_data: pickedDataUrl})
       });
-      if (!r.ok && r.status === 400) {
-        // kind 컬럼 미지원(스키마 이전) — kind 없이 재시도
-        r = await fetch(SUPA_URL + '/rest/v1/mel_photos', {
-          method: 'POST', headers: H,
-          body: JSON.stringify({photo_date: dateVal, memo: memo || null, image_data: pickedDataUrl})
-        });
-      }
       if (!r.ok) throw new Error('save fail ' + r.status);
     }
     const item = {photo_date: dateVal, memo: memo || '', image_data: pickedDataUrl, kind: isVideo ? 'video' : 'photo', created_at: new Date().toISOString()};
@@ -394,7 +387,7 @@ function renderGallery(){
     const d = (p.photo_date || '').replaceAll('-', '.');
     const diff = ddayOf(p.photo_date);
     const tag = diff < 0 ? 'D' + diff : (diff === 0 ? '🎉 태어난 날!' : 'D+' + diff);
-    const vid = p.kind === 'video';
+    const vid = (p.image_data || '').startsWith('data:video');
     const media = vid
       ? `<video src="${p.image_data}" preload="metadata" muted></video>`
       : `<img src="${p.image_data}" loading="lazy">`;
@@ -452,7 +445,7 @@ function openDay(dateKey){
     html = `<div class="m-empty">이 날에는 기록이 없어요 🌱<br>기록 탭에서 이 날짜로 남겨볼 수 있어요</div>`;
   } else {
     photos.forEach(p => {
-      const vid = p.kind === 'video';
+      const vid = (p.image_data || '').startsWith('data:video');
       const media = vid
         ? `<video class="m-media video" src="${p.image_data}" controls playsinline></video>`
         : `<img class="m-media" src="${p.image_data}">`;
