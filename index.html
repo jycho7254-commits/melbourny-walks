@@ -43,7 +43,12 @@ nav button.on{color:var(--pink-d)}
 .welcome{background:var(--white);border-radius:18px;padding:18px;margin-bottom:16px;border:1px solid var(--line)}
 .welcome .msg{font-size:14.5px;line-height:1.7}
 .welcome .msg b{color:var(--pink-d)}
-.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.tile{position:relative;aspect-ratio:1;overflow:hidden;border-radius:8px;cursor:pointer;background:var(--cream2)}
+.tile img,.tile video{width:100%;height:100%;object-fit:cover;display:block}
+.tile-play{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:11px}
+.tile-del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.45);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:11px;opacity:0;transition:opacity .15s}
+.tile:active .tile-del{opacity:1}
 .photo-card{background:var(--white);border-radius:16px;overflow:hidden;border:1px solid var(--line)}
 .photo-card img,.photo-card video{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:var(--cream2)}
 .photo-card .info{padding:10px 12px}
@@ -105,7 +110,7 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .media-wrap{position:relative}
 .play-badge{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:10px;padding:3px 8px;font-size:10.5px;z-index:3}
 .share-ico{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.85);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;z-index:3;cursor:pointer}
-@media(max-width:400px){.gallery{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:600px){.gallery{grid-template-columns:repeat(5,1fr)}}
 </style>
 </head>
 <body>
@@ -384,18 +389,13 @@ function renderGallery(){
     return;
   }
   g.innerHTML = PHOTOS.map((p, i) => {
-    const d = (p.photo_date || '').replaceAll('-', '.');
-    const diff = ddayOf(p.photo_date);
-    const tag = diff < 0 ? 'D' + diff : (diff === 0 ? '🎉 태어난 날!' : 'D+' + diff);
     const vid = (p.image_data || '').startsWith('data:video');
     const media = vid
       ? `<video src="${p.image_data}" preload="metadata" muted></video>`
       : `<img src="${p.image_data}" loading="lazy">`;
-    return `<div class="photo-card"><div class="media-wrap" onclick="openDay('${p.photo_date}')">${media}
-      ${vid ? '<span class="play-badge">▶ 동영상</span>' : ''}
-      <button class="share-ico" onclick="event.stopPropagation();shareItem(${i})">🔗</button></div>
-      <div class="info" onclick="openDay('${p.photo_date}')"><div class="date">${d}</div>${p.memo ? `<div class="memo">${esc(p.memo)}</div>` : ''}<span class="dday-tag">${tag}</span></div>
-      <button class="del-btn" onclick="event.stopPropagation();delPhoto(${i})">삭제</button></div>`;
+    return `<div class="tile" onclick="openDay('${p.photo_date}')">${media}
+      ${vid ? '<span class="tile-play">▶</span>' : ''}
+      <button class="tile-del" onclick="event.stopPropagation();delPhoto(${i})">✕</button></div>`;
   }).join('');
 }
 function renderDiary(){
@@ -432,9 +432,16 @@ function renderCal(){
 }
 
 // ═══════════ 날짜 팝업 ═══════════
-function openDay(dateKey){
+async function openDay(dateKey){
   if (!dateKey) return;
   const photos = PHOTOS.filter(p => p.photo_date === dateKey);
+  // 다른 기기가 쓴 일기까지 반영 — 서버 재조회 (실패해도 기존 데이터로 진행)
+  if (DB_ON) {
+    try {
+      const rd = await fetch(SUPA_URL + '/rest/v1/' + 'mel_diary' + '?order=created_at.desc&limit=200', {headers: H});
+      if (rd.ok) { DIARY = await rd.json(); }
+    } catch (e) {}
+  }
   const diaries = DIARY.filter(d => (d.created_at || '').slice(0, 10) === dateKey);
   const diff = ddayOf(dateKey);
   const dLabel = dateKey.replaceAll('-', '.');
