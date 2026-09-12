@@ -111,6 +111,28 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .play-badge{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:10px;padding:3px 8px;font-size:10.5px;z-index:3}
 .share-ico{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.85);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;z-index:3;cursor:pointer}
 @media(min-width:600px){.gallery{grid-template-columns:repeat(5,1fr)}}
+/* ── 프로필/설정 ── */
+.profile-btn{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:15px;cursor:pointer;margin-right:8px}
+.tile-auth{position:absolute;left:5px;bottom:5px;width:22px;height:22px;border-radius:50%;color:#fff;font-size:11px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:2}
+.tile-auth.ab{background:#5B8DEF}
+.tile-auth.em{background:#F27BA9}
+.auth-chip{display:inline-block;font-size:10px;font-weight:bold;color:#fff;border-radius:8px;padding:2px 7px;margin-right:6px;vertical-align:1px}
+.auth-chip.ab{background:#5B8DEF}
+.auth-chip.em{background:#F27BA9}
+#setModal{position:fixed;inset:0;background:rgba(60,40,30,.55);z-index:150;display:none;align-items:center;justify-content:center;padding:20px}
+#setModal.show{display:flex}
+#setModal .card{background:var(--white);border-radius:20px;padding:22px 20px;max-width:340px;width:100%;max-height:85vh;overflow-y:auto}
+#setModal h3{font-size:15px;color:var(--pink-d);margin-bottom:4px}
+#setModal .sec{font-size:12px;color:var(--sub);font-weight:bold;margin:14px 0 8px}
+.prof-row{display:flex;gap:8px}
+.prof-row button{flex:1;padding:12px;border:2px solid var(--line);border-radius:12px;background:#FFFEFB;font-size:14px;font-weight:bold;cursor:pointer}
+.prof-row button.on{border-color:var(--pink-d);background:var(--cream2)}
+.icon-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.icon-grid img{width:100%;aspect-ratio:1;border-radius:12px;border:2px solid transparent;cursor:pointer;display:block}
+.icon-grid img.picked{border-color:var(--pink-d)}
+.icon-up{margin-top:10px;width:100%;padding:12px;border:2px dashed var(--pink);border-radius:12px;background:var(--cream);color:var(--pink-d);font-weight:bold;font-size:13px;text-align:center;cursor:pointer}
+.note{font-size:11px;color:var(--sub);line-height:1.6;margin-top:12px}
+#setModal .close{width:100%;margin-top:14px;padding:12px;background:var(--pink);color:#fff;border:none;border-radius:12px;font-weight:bold}
 </style>
 </head>
 <body>
@@ -130,6 +152,7 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 <header>
   <div class="h-row">
     <h1 class="logo">👣 멜버니의 걸음마</h1>
+    <button class="profile-btn" onclick="openSettings()" id="profileBtn">👤</button>
     <div class="dday-box">
       <div class="dday-num" id="ddayNum">D-day</div>
       <div class="dday-lab" id="ddayLab">2026.09.15 출생 예정</div>
@@ -192,6 +215,25 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
       <button class="m-close" onclick="closeDay()">✕</button>
     </div>
     <div id="mBody"></div>
+  </div>
+</div>
+
+
+<!-- ══ 설정 모달 ══ -->
+<div id="setModal" onclick="if(event.target===this)closeSettings()">
+  <div class="card">
+    <h3>⚙️ 설정</h3>
+    <div class="sec">👤 이 기기 사용자 (기록에 표시돼요)</div>
+    <div class="prof-row">
+      <button onclick="selectProfile('아빠')" id="pb-아빠">👨 아빠</button>
+      <button onclick="selectProfile('엄마')" id="pb-엄마">👩 엄마</button>
+    </div>
+    <div class="sec">🖼️ 앱 아이콘 (홈 화면)</div>
+    <div class="icon-grid" id="iconGrid"></div>
+    <div class="icon-up" onclick="document.getElementById('iconFile').click()">📷 내 사진으로 아이콘 만들기</div>
+    <input type="file" id="iconFile" accept="image/*" style="display:none">
+    <div class="note">· 아이콘을 바꾼 뒤 <b>홈 화면에 다시 추가</b>하면 새 아이콘으로 깔려요 (기존 아이콘 지우고)<br>· 안드로이드: 크롬 ⋮ → 홈 화면에 추가 / 아이폰: 사파리 공유⬆️ → 홈 화면에 추가<br>· 설정은 이 기기에만 저장돼요</div>
+    <button class="close" onclick="closeSettings()">닫기</button>
   </div>
 </div>
 
@@ -320,17 +362,18 @@ async function doUpload(){
   const btn = document.getElementById('submitBtn');
   const dateVal = document.getElementById('dateInput').value || new Date().toISOString().slice(0, 10);
   const memo = document.getElementById('memoInput').value.trim();
+  const _auth = getProfile(); const memoFull = _auth ? _auth + '|' + memo : null;
   if (!pickedDataUrl) { toast('사진을 먼저 골라주세요 📷'); return; }
   btn.disabled = true; btn.textContent = '담는 중... 💗';
   try {
     if (DB_ON) {
       let r = await fetch(SUPA_URL + '/rest/v1/mel_photos', {
         method: 'POST', headers: H,
-        body: JSON.stringify({photo_date: dateVal, memo: memo || null, image_data: pickedDataUrl})
+        body: JSON.stringify({photo_date: dateVal, memo: memoFull !== null ? memoFull : (memo || null), image_data: pickedDataUrl})
       });
       if (!r.ok) throw new Error('save fail ' + r.status);
     }
-    const item = {photo_date: dateVal, memo: memo || '', image_data: pickedDataUrl, kind: isVideo ? 'video' : 'photo', created_at: new Date().toISOString()};
+    const item = {photo_date: dateVal, memo: memoFull !== null ? memoFull : (memo || ''), image_data: pickedDataUrl, kind: isVideo ? 'video' : 'photo', created_at: new Date().toISOString()};
     PHOTOS.unshift(item);
     localStorage.setItem('mel_photos', JSON.stringify(PHOTOS.slice(0, 100)));
     renderGallery();
@@ -355,11 +398,12 @@ async function doUpload(){
 async function doDiary(){
   const t = document.getElementById('diaryInput').value.trim();
   if (!t) { toast('한 마디라도 적어주세요 ✏️'); return; }
-  const item = {text: t, created_at: new Date().toISOString()};
+  const _auth = getProfile(); const tFull = _auth ? _auth + '|' + t : t;
+  const item = {text: tFull, created_at: new Date().toISOString()};
   if (DB_ON) {
     try {
       const r = await fetch(SUPA_URL + '/rest/v1/mel_diary', {
-        method: 'POST', headers: H, body: JSON.stringify({text: t})
+        method: 'POST', headers: H, body: JSON.stringify({text: tFull})
       });
       if (!r.ok) throw 0;
     } catch (e) { toast('저장 실패'); return; }
@@ -395,6 +439,7 @@ function renderGallery(){
       : `<img src="${p.image_data}" loading="lazy">`;
     return `<div class="tile" onclick="openDay('${p.photo_date}')">${media}
       ${vid ? '<span class="tile-play">▶</span>' : ''}
+      ${authBadge(p.memo)}
       <button class="tile-del" onclick="event.stopPropagation();delPhoto(${i})">✕</button></div>`;
   }).join('');
 }
@@ -404,7 +449,7 @@ function renderDiary(){
   el.innerHTML = DIARY.map(d => {
     const dt = (d.created_at || '').slice(0, 10).replaceAll('-', '.');
     const diff = ddayOf(dt);
-    return `<div class="diary-item"><div class="d"><span>${dt}</span><span class="tag">${diff < 0 ? 'D' + diff : 'D+' + diff}</span></div><div class="t">${esc(d.text)}</div><button class="del-btn" onclick="delDiary(${DIARY.indexOf(d)})">삭제</button></div>`;
+    return `<div class="diary-item"><div class="d"><span>${dt}</span><span class="tag">${diff < 0 ? 'D' + diff : 'D+' + diff}</span></div><div class="t">${authChip(parseAuthor(d.text).a)}${esc(parseAuthor(d.text).t)}</div><button class="del-btn" onclick="delDiary(${DIARY.indexOf(d)})">삭제</button></div>`;
   }).join('');
 }
 
@@ -457,10 +502,10 @@ async function openDay(dateKey){
         ? `<video class="m-media video" src="${p.image_data}" controls playsinline></video>`
         : `<img class="m-media" src="${p.image_data}">`;
       html += media;
-      if (p.memo) html += `<div class="m-memo">${esc(p.memo)}</div>`;
+      if (p.memo) { const pp = parseAuthor(p.memo); html += `<div class="m-memo">${authChip(pp.a)}${esc(pp.t)}</div>`; }
     });
     diaries.forEach(d => {
-      html += `<div class="m-diary"><div class="dt">✏️ 일기</div>${esc(d.text)}</div>`;
+      { const dp = parseAuthor(d.text); html += `<div class="m-diary"><div class="dt">${authChip(dp.a)}✏️ 일기</div>${esc(dp.t)}</div>`; }
     });
     if (photos.length) html += `<button class="share-btn" onclick="shareDay('${dateKey}')">🔗 이 날 사진 공유하기</button>`;
   }
@@ -509,7 +554,7 @@ async function shareItem(idx){
   const p = PHOTOS[idx];
   if (!p) return;
   const dTag = ddayOf(p.photo_date);
-  const label = (p.memo ? p.memo + ' — ' : '') + (p.photo_date || '') + (dTag >= 0 ? ' (D+' + dTag + ')' : ' (D' + dTag + ')');
+  const pm0 = parseAuthor(p.memo); const label = (pm0.t ? pm0.t + ' — ' : '') + (p.photo_date || '') + (dTag >= 0 ? ' (D+' + dTag + ')' : ' (D' + dTag + ')');
   try {
     // 사진 파일로 공유 시도 (카톡에서 사진 바로 전송)
     const blob = await (await fetch(p.image_data)).blob();
@@ -530,6 +575,25 @@ async function shareDay(dateKey){
   if (!photos.length) return;
   await shareItem(PHOTOS.indexOf(photos[0]));
 }
+
+// ═══════════ 프로필/아이콘 설정 ═══════════
+const PROFILE_KEY = 'mel_profile', ICON_KEY = 'mel_icon';
+const MANIFEST_BASE = {name:'멜버니의 걸음마', short_name:'멜버니', description:'우리 가족만의 성장 앨범', start_url:'./', display:'standalone', orientation:'portrait', background_color:'#FDF6EE', theme_color:'#F7C8C0'};
+function getProfile(){ return localStorage.getItem(PROFILE_KEY) || ''; }
+function parseAuthor(m){ if(!m) return {a:'', t:''}; const i = m.indexOf('|'); if(i > 0 && (m.slice(0, i) === '아빠' || m.slice(0, i) === '엄마')) return {a: m.slice(0, i), t: m.slice(i + 1)}; return {a: '', t: m}; }
+function authBadge(m){ const a = parseAuthor(m).a; return a ? `<span class="tile-auth ${a === '아빠' ? 'ab' : 'em'}">${a === '아빠' ? '아' : '엄'}</span>` : ''; }
+function authChip(a){ return a ? `<span class="auth-chip ${a === '아빠' ? 'ab' : 'em'}">${a}</span>` : ''; }
+function updateProfileBtn(){ const b = document.getElementById('profileBtn'); if(!b) return; const p = getProfile(); b.textContent = p ? (p === '아빠' ? '👨' : '👩') : '👤'; }
+function selectProfile(a){ localStorage.setItem(PROFILE_KEY, a); updateProfileBtn(); renderProfileSel(); toast(a + ' 모드 — 이제 올리는 기록에 ' + a + ' 표시가 붙어요'); }
+function renderProfileSel(){ const p = getProfile(); ['아빠','엄마'].forEach(a => { const b = document.getElementById('pb-' + a); if(b) b.classList.toggle('on', p === a); }); }
+const ICON_PRESETS = [['🍼','#F9C5D1'],['👣','#F7D9A8'],['💗','#F2A9A0'],['🧸','#D9C2A3'],['🌸','#E4BFD9'],['⭐','#F2E2A0']];
+function drawPreset(emoji, bg){ const c = document.createElement('canvas'); c.width = c.height = 192; const x = c.getContext('2d'); x.fillStyle = bg; x.fillRect(0, 0, 192, 192); x.font = '110px serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(emoji, 96, 104); return c.toDataURL('image/png'); }
+function renderIconGrid(){ const g = document.getElementById('iconGrid'); if(!g) return; const cur = localStorage.getItem(ICON_KEY); g.innerHTML = ''; ICON_PRESETS.forEach(pr => { const url = drawPreset(pr[0], pr[1]); const img = document.createElement('img'); img.src = url; if(cur === url) img.classList.add('picked'); img.onclick = () => pickIcon(url); g.appendChild(img); }); }
+function pickIcon(url){ try{ localStorage.setItem(ICON_KEY, url); }catch(e){} applyIcon(url); renderIconGrid(); toast('아이콘 설정 완료 — 홈 화면에 다시 추가해보세요 💗'); }
+function applyIcon(url){ try{ let l = document.querySelector('link[rel="icon"]'); if(l) l.href = url; let a = document.querySelector('link[rel="apple-touch-icon"]'); if(a) a.href = url; const mf = Object.assign({}, MANIFEST_BASE, {icons:[{src:url, sizes:'192x192', type:'image/png'},{src:url, sizes:'512x512', type:'image/png'}]}); const blob = new Blob([JSON.stringify(mf)], {type:'application/json'}); if(window._mfURL) URL.revokeObjectURL(window._mfURL); window._mfURL = URL.createObjectURL(blob); let m = document.querySelector('link[rel="manifest"]'); if(m) m.href = window._mfURL; }catch(e){} }
+document.getElementById('iconFile').addEventListener('change', function(){ const f = this.files[0]; if(!f) return; const rd = new FileReader(); rd.onload = ev => { const img = new Image(); img.onload = () => { const s = Math.min(img.width, img.height); const c = document.createElement('canvas'); c.width = c.height = 192; c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 192, 192); pickIcon(c.toDataURL('image/png')); }; img.src = ev.target.result; }; rd.readAsDataURL(f); this.value = ''; });
+function openSettings(){ renderProfileSel(); renderIconGrid(); document.getElementById('setModal').classList.add('show'); }
+function closeSettings(){ document.getElementById('setModal').classList.remove('show'); }
 
 // ═══════════ 유틸 ═══════════
 function ddayOf(dateStr){
@@ -562,6 +626,9 @@ function init(){
   document.getElementById('dateInput').max = today;
   loadData();
 }
+// 설정 복원 (아이콘/프로필)
+(function(){ const ic = localStorage.getItem(ICON_KEY); if(ic) applyIcon(ic); updateProfileBtn(); })();
+
 // 세션 유지 (하루 동안 로그인 기억)
 if (sessionStorage.getItem('mel_auth') === '1') {
   document.getElementById('gate').style.display = 'none';
