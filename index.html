@@ -111,40 +111,49 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .play-badge{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:10px;padding:3px 8px;font-size:10.5px;z-index:3}
 .share-ico{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.85);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;z-index:3;cursor:pointer}
 @media(min-width:600px){.gallery{grid-template-columns:repeat(5,1fr)}}
-/* ── 수유텀 ── */
-.care-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
-.care-btn{border:none;border-radius:14px;padding:14px 4px;font-size:12px;font-weight:bold;color:#fff;line-height:1.35}
-.care-btn small{font-weight:normal;opacity:.85;font-size:10px}
-.care-btn.bm{background:#F2A9A0}
-.care-btn.fm{background:#E8907E}
-.care-btn.food{background:#C9A77C}
-.care-btn.sleep{background:#8FA8C9}
-.care-btn.pee{background:#8FCBB4}
-.care-btn.poop{background:#B99B72}
-.care-btn.med{background:#C58FC9}
-.care-btn:active{transform:scale(.95)}
-.care-item{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-.care-item .ci-l{font-size:13px;font-weight:bold}
-.care-item .ci-r{font-size:11px;color:var(--sub);text-align:right}
-.care-item .del{background:none;border:none;color:#C77F74;font-size:11px;font-weight:bold}
-.care-item.just{animation:pop .3s ease}
-@keyframes pop{0%{transform:scale(.92);opacity:.4}100%{transform:none;opacity:1}}
-/* ── 통계 ── */
-.stats-box{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
-.stat-row{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--line)}
-.stat-row:last-child{border:none}
-.stat-row b{color:var(--pink-d)}
-.sbar-wrap{margin:7px 0}
-.sbar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px}
-.sbar{height:8px;background:var(--cream2);border-radius:6px;overflow:hidden}
-.sbar>div{height:100%;background:var(--pink);border-radius:6px;transition:width .4s}
-.hour-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:2px}
-.hour-cell{aspect-ratio:1;border-radius:3px;background:var(--cream2)}
-.hour-cell.lv1{background:#F8D9D4}
-.hour-cell.lv2{background:#F2B7AE}
-.hour-cell.lv3{background:#E98F82}
-.hour-cell.lv4{background:#D96455}
-.hour-labels{display:grid;grid-template-columns:repeat(12,1fr);font-size:8px;color:var(--sub);margin-top:2px;text-align:center}
+/* ── 수유텀 (쑥쑥 스타일) ── */
+.dday-strip{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dday-strip span{font-size:17px;font-weight:bold;color:var(--pink-d)}
+.pat-btn{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:7px 14px;font-size:12px;font-weight:bold;color:var(--pink-d)}
+.cat-row{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;-webkit-overflow-scrolling:touch}
+.cat-row::-webkit-scrollbar{display:none}
+.cat-btn{flex:0 0 62px;height:62px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10.5px;font-weight:bold;color:#4A3B35;cursor:pointer;border:none}
+.cat-ico{font-size:20px;margin-bottom:2px}
+.c-bm{background:#FCE8B8}.c-fm{background:#F8D3CE}.c-food{background:#D3E9F5}.c-pee{background:#D4F0E4}.c-poop{background:#E8D8C3}.c-sleep{background:#D5DCF0}.c-med{background:#EDD6F0}
+.cat-btn:active{transform:scale(.92)}
+.recent-strip{display:flex;gap:8px;margin-bottom:14px}
+.recent-strip>div{flex:1;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center}
+.recent-strip small{font-size:10px;color:var(--sub);display:block;margin-bottom:3px}
+.recent-strip b{font-size:12.5px;color:var(--ink)}
+/* 타임라인 */
+.date-head{font-size:13px;font-weight:bold;margin:14px 0 8px;color:var(--ink)}
+.day-summary{background:var(--cream2);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:11.5px;color:var(--ink);line-height:1.7}
+.day-summary b{color:var(--pink-d)}
+.tl-item{display:flex;gap:10px;align-items:flex-start;position:relative;padding:0 0 14px 0}
+.tl-item::before{content:'';position:absolute;left:13px;top:26px;bottom:-2px;width:2px;background:var(--line)}
+.tl-item:last-child::before{display:none}
+.tl-time{flex:0 0 58px;background:var(--cat,#EEE);color:#fff;font-size:10.5px;font-weight:bold;border-radius:8px;padding:4px 3px;text-align:center}
+.tl-body{flex:1;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center}
+.tl-kind{font-size:13.5px;font-weight:bold}
+.tl-kind small{font-weight:normal;color:var(--sub);font-size:11px;margin-left:5px}
+.tl-right{text-align:right}
+.tl-dd{font-size:10px;color:var(--sub)}
+.tl-del{background:none;border:none;color:#C77F74;font-size:10.5px;font-weight:bold;padding:2px}
+/* 시간 수정 시트 */
+#timeSheet{position:fixed;inset:0;background:rgba(60,40,30,.55);z-index:160;display:none;align-items:flex-end;justify-content:center}
+#timeSheet.show{display:flex}
+#timeSheet .sheet{background:var(--white);border-radius:22px 22px 0 0;width:100%;max-width:640px;padding:20px 18px 30px}
+#timeSheet h3{font-size:14px;color:var(--pink-d);margin-bottom:12px}
+.ts-row{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.ts-row label{flex:0 0 66px;font-size:12px;color:var(--sub);font-weight:bold}
+.ts-row select,.ts-row input{flex:1;padding:10px;border:2px solid var(--line);border-radius:10px;font-size:14px;background:#FFFEFB}
+.ts-detail{display:flex;gap:6px;flex-wrap:wrap}
+.ts-detail button{padding:8px 12px;border:2px solid var(--line);border-radius:18px;background:#FFFEFB;font-size:12px;font-weight:bold}
+.ts-detail button.on{border-color:var(--pink-d);color:var(--pink-d);background:var(--cream)}
+.ts-save{width:100%;padding:13px;background:var(--pink);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:bold;margin-top:6px}
+#quickSheet{position:fixed;inset:0;background:rgba(60,40,30,.55);z-index:160;display:none;align-items:flex-end;justify-content:center}
+#quickSheet.show{display:flex}
+.qk-btn{border:2px solid;border-radius:14px;padding:16px 4px;font-size:12.5px;font-weight:bold;cursor:pointer}
 
 /* ── 프로필/설정 ── */
 .profile-btn{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:15px;cursor:pointer;margin-right:8px}
@@ -235,32 +244,50 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 
 <!-- ══ 수유텀 ══ -->
 <div class="view" id="v-care">
-  <div class="care-grid">
-    <button class="care-btn bm" onclick="addCare('모유','왼쪽')">🤱 모유<br><small>왼쪽</small></button>
-    <button class="care-btn bm" onclick="addCare('모유','오른쪽')">🤱 모유<br><small>오른쪽</small></button>
-    <button class="care-btn bm" onclick="addCare('모유','둘 다')">🤱 모유<br><small>둘 다</small></button>
-    <button class="care-btn fm" onclick="addCare('분유')">🍼 분유</button>
-    <button class="care-btn food" onclick="addCare('이유식')">🥣 이유식</button>
-    <button class="care-btn sleep" onclick="addCare('수면')">😴 수면</button>
-    <button class="care-btn pee" onclick="addCare('소변')">💧 소변</button>
-    <button class="care-btn poop" onclick="addCare('대변')">💩 대변</button>
-    <button class="care-btn med" onclick="addCare('약')">💊 약</button>
+  <div class="dday-strip">
+    <span id="careDday">D+0</span>
+    <button class="pat-btn" onclick="showTab('stats')">📊 통계 패턴</button>
   </div>
-  <p class="hint">누르면 바로 기록돼요 · 다시 누르면 취소</p>
-  <div id="careList"></div>
+  <div class="cat-row">
+    <div class="cat-btn c-bm" onclick="addCare('모유')"><span class="cat-ico">🤱</span>모유</div>
+    <div class="cat-btn c-fm" onclick="addCare('분유')"><span class="cat-ico">🍼</span>분유</div>
+    <div class="cat-btn c-food" onclick="addCare('이유식')"><span class="cat-ico">🥣</span>이유식</div>
+    <div class="cat-btn c-pee" onclick="addCare('소변')"><span class="cat-ico">💧</span>소변</div>
+    <div class="cat-btn c-poop" onclick="addCare('대변')"><span class="cat-ico">💩</span>대변</div>
+    <div class="cat-btn c-sleep" onclick="addCare('수면')"><span class="cat-ico">😴</span>수면</div>
+    <div class="cat-btn c-med" onclick="addCare('약')"><span class="cat-ico">💊</span>약</div>
+  </div>
+  <div class="recent-strip">
+    <div><small>최근 수유</small><b id="rcFeed">-</b></div>
+    <div><small>최근 배변</small><b id="rcPoo">-</b></div>
+    <div><small>최근 수면</small><b id="rcSleep">-</b></div>
+    <div style="cursor:pointer;background:var(--cream2)" onclick="openQuickSheet()"><small>⏰ 시간설정</small><b>직접 입력</b></div>
+  </div>
+  <div id="careTimeline"></div>
 </div>
 
 <!-- ══ 통계 ══ -->
 <div class="view" id="v-stats">
   <div class="stats-box">
-    <h3 style="color:var(--pink-d);font-size:14px;margin-bottom:8px">📈 최근 7일</h3>
+    <h3 style="color:var(--pink-d);font-size:14px;margin-bottom:10px">📈 최근 7일 요약</h3>
     <div id="statsSummary"></div>
+  </div>
+  <div class="stats-box">
+    <h3 style="color:var(--pink-d);font-size:14px;margin-bottom:10px">📅 요일별 수유</h3>
     <div id="statsBars"></div>
   </div>
   <div class="stats-box">
-    <h3 style="color:var(--pink-d);font-size:14px;margin-bottom:8px">🕐 시간대 패턴 (수유)</h3>
+    <h3 style="color:var(--pink-d);font-size:14px;margin-bottom:8px">🕐 시간대 패턴 <small style="font-weight:normal;color:var(--sub)">(수유 · 최근 14일)</small></h3>
     <div id="statsHours" class="hour-grid"></div>
-    <p class="hint">진한 칸 = 자주 수유한 시간대 (최근 14일)</p>
+    <div id="hourLabels"></div>
+  </div>
+  <div class="stats-box">
+    <h3 style="color:var(--pink-d);font-size:14px;margin-bottom:10px">⏱️ 수유 간격 (최근 10회)</h3>
+    <div id="statsInterval"></div>
+  </div>
+  <div class="stats-box">
+    <h3 style="color:var(--pink-d);font-size:14px;margin-bottom:10px">📊 일별 수유 추이 (14일)</h3>
+    <div id="statsTrend"></div>
   </div>
 </div>
 
@@ -276,6 +303,29 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 </div>
 
 <!-- ══ 날짜 상세 팝업 ══ -->
+<!-- ══ 시간설정 시트 ══ -->
+<div id="timeSheet" onclick="if(event.target===this)closeTimeSheet()">
+  <div class="sheet" style="background:var(--white);border-radius:22px 22px 0 0;width:100%;max-width:640px;padding:20px 18px 30px">
+    <h3 id="tsTitle" style="font-size:14px;color:var(--pink-d);margin-bottom:14px">시간 정해서 기록</h3>
+    <div class="ts-row"><label>날짜/시간</label><input type="date" id="tsDate"><select id="tsHour"></select><select id="tsMin"></select></div>
+    <div class="ts-row" id="tsDetailRow"><label>모유 세부</label>
+      <div class="ts-detail">
+        <button onclick="tsPickDetail(this,'왼쪽')">왼쪽</button>
+        <button onclick="tsPickDetail(this,'오른쪽')">오른쪽</button>
+        <button onclick="tsPickDetail(this,'둘 다')">둘 다</button>
+      </div>
+    </div>
+    <button class="ts-save" onclick="tsSave()">기록하기 💗</button>
+  </div>
+</div>
+<!-- ══ 퀵 시트 (종류별 시간설정 진입) ══ -->
+<div id="quickSheet" onclick="if(event.target===this)closeQuick()">
+  <div style="background:var(--white);border-radius:22px 22px 0 0;width:100%;max-width:640px;padding:20px 18px 30px;max-height:70vh;overflow:auto">
+    <h3 style="font-size:14px;color:var(--pink-d);margin-bottom:14px">⏰ 시간 정해서 기록 — 종류 선택</h3>
+    <div id="quickGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+  </div>
+</div>
+
 <div id="dayModal" onclick="if(event.target===this)closeDay()">
   <div class="sheet">
     <div class="m-head">
@@ -677,34 +727,47 @@ function renderRelation(){
 
 // ═══════════ 수유텀 ═══════════
 let CARE = [];
-function careIcon(k){ return {'모유':'🤱','분유':'🍼','이유식':'🥣','수면':'😴','소변':'💧','대변':'💩','약':'💊'}[k] || '•'; }
-async function addCare(kind, detail){
-  const now = new Date();
-  const item = {kind, detail: detail || '', memo: '', created_at: now.toISOString(), by: getProfile() || ''};
+const CAT_COLOR = {'모유':'#E8C26B','분유':'#E8907E','이유식':'#8FB8D4','소변':'#7FC4A6','대변':'#B99B72','수면':'#8C9BC9','약':'#C58FC9'};
+function careIcon(k){ return {'모유':'🤱','분유':'🍼','이유식':'🥣','소변':'💧','대변':'💩','수면':'😴','약':'💊'}[k] || '•'; }
+function fmt12(iso){
+  const d = new Date(iso);
+  let h = d.getHours(); const ap = h < 12 ? '오전' : '오후';
+  h = h % 12 || 12;
+  return ap + ' ' + h + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+function ago(iso){
+  const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (m < 1) return '방금 전';
+  if (m < 60) return m + '분 전';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + '시간 전';
+  return Math.floor(h / 24) + '일 전';
+}
+async function addCare(kind, detail, at){
+  const when = at || new Date().toISOString();
+  const item = {kind, detail: detail || '', created_at: when, by: getProfile() || ''};
   if (DB_ON) {
     try {
       const r = await fetch(SUPA_URL + '/rest/v1/mel_care', {
         method: 'POST', headers: H,
-        body: JSON.stringify({kind: kind, detail: item.detail, memo: '', by: item.by})
+        body: JSON.stringify({kind: kind, detail: item.detail, memo: '', by: item.by, created_at: when})
       });
       if (r.ok) {
-        // 서버 저장 성공 — id 수령
         const rows = await r.json().catch(() => []);
         if (rows && rows[0] && rows[0].id) item.id = rows[0].id;
       }
-      // 실패 시에도 로컬 저장 (나중에 동기화 대상) — 기록은 절대 안 잃게
     } catch (e) { /* 오프라인 — 로컬 저장 */ }
   }
   CARE.unshift(item);
-  localStorage.setItem('mel_care', JSON.stringify(CARE.slice(0, 300)));
+  localStorage.setItem('mel_care', JSON.stringify(CARE.slice(0, 400)));
   toast(careIcon(kind) + ' ' + kind + (detail ? ' · ' + detail : '') + ' 기록 💗');
   renderCare();
 }
 async function loadCare(){
   if (DB_ON) {
     try {
-      const r = await fetch(SUPA_URL + '/rest/v1/mel_care?order=created_at.desc&limit=200', {headers: H});
-      if (r.ok) { CARE = await r.json(); localStorage.setItem('mel_care', JSON.stringify(CARE.slice(0, 300))); }
+      const r = await fetch(SUPA_URL + '/rest/v1/mel_care?order=created_at.desc&limit=400', {headers: H});
+      if (r.ok) { CARE = await r.json(); localStorage.setItem('mel_care', JSON.stringify(CARE.slice(0, 400))); }
     } catch (e) {}
   } else {
     CARE = JSON.parse(localStorage.getItem('mel_care') || '[]');
@@ -712,73 +775,178 @@ async function loadCare(){
   renderCare();
 }
 function renderCare(){
-  const el = document.getElementById('careList');
+  const el = document.getElementById('careTimeline');
   if (!el) return;
-  const today = new Date().toISOString().slice(0, 10);
-  const items = CARE.filter(c => (c.created_at || '').slice(0, 10) === today);
-  if (!items.length) {
-    el.innerHTML = '<div class="empty" style="padding:30px 16px">오늘의 기록이 아직 없어요<br>위 버튼을 눌러 바로 남겨보세요 🍼</div>';
+  const dn = document.getElementById('ddayNum');
+  const dEl = document.getElementById('careDday');
+  if (dEl && dn) dEl.textContent = dn.textContent + ' · 우리 멜버니';
+  const lastOf = k => { const f = CARE.find(c => c.kind === k); return f ? ago(f.created_at) : '-'; };
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  set('rcFeed', lastOf('모유') !== '-' ? lastOf('모유') : lastOf('분유'));
+  set('rcPoo', lastOf('대변') !== '-' ? lastOf('대변') : lastOf('소변'));
+  set('rcSleep', lastOf('수면'));
+  const byDate = {};
+  CARE.forEach(c => {
+    const d = (c.created_at || '').slice(0, 10);
+    (byDate[d] = byDate[d] || []).push(c);
+  });
+  const dates = Object.keys(byDate).sort().reverse().slice(0, 14);
+  if (!dates.length) {
+    el.innerHTML = '<div class="empty" style="padding:40px 16px">아직 기록이 없어요<br>위 버튼을 눌러 첫 기록을 남겨보세요 🍼</div>';
     return;
   }
-  el.innerHTML = items.map((c, i) => {
-    const t = (c.created_at || '').slice(11, 16);
-    const who = c.by ? ` <span class="auth-chip ${c.by === '아빠' ? 'ab' : 'em'}">${c.by}</span>` : '';
-    const dd = ddayOf(today);
-    return `<div class="care-item just"><span class="ci-l">${careIcon(c.kind)} ${c.kind}${c.detail ? ' · ' + c.detail : ''}${who}</span><span class="ci-r">D+${dd} · ${t}<br><button class="del" onclick="delCare(${i})">삭제</button></span></div>`;
-  }).join('');
+  let html = '';
+  const dayLabels = ['일','월','화','수','목','금','토'];
+  dates.forEach(d => {
+    const items = byDate[d];
+    const ddObj = new Date(d + 'T00:00:00');
+    const isToday = d === new Date().toISOString().slice(0, 10);
+    const label = (ddObj.getMonth() + 1) + '월 ' + ddObj.getDate() + '일 (' + dayLabels[ddObj.getDay()] + '요일)' + (isToday ? ' · 오늘' : '');
+    const cnt = k => items.filter(c => c.kind === k).length;
+    const feeds = cnt('모유') + cnt('분유') + cnt('이유식');
+    const poos = cnt('대변') + cnt('소변');
+    const dd = ddayOf(d);
+    html += `<div class="date-head">${label}</div>`;
+    html += `<div class="day-summary">D${dd >= 0 ? '+' + dd : dd} · 수유 <b>${feeds}회</b> · 배변 <b>${poos}회</b> · 수면 <b>${cnt('수면')}회</b>${cnt('약') ? ' · 약 ' + cnt('약') + '회' : ''}</div>`;
+    items.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')).forEach(c => {
+      const col = CAT_COLOR[c.kind] || '#CCC';
+      const who = c.by ? `<span class="auth-chip ${c.by === '아빠' ? 'ab' : 'em'}">${c.by}</span>` : '';
+      html += `<div class="tl-item">
+        <span class="tl-time" style="background:${col}">${fmt12(c.created_at)}</span>
+        <div class="tl-body">
+          <span class="tl-kind">${careIcon(c.kind)} ${c.kind}${c.detail ? `<small>${esc(c.detail)}</small>` : ''} ${who}</span>
+          <span class="tl-right"><span class="tl-dd">D${dd >= 0 ? '+' + dd : dd}</span><br><button class="tl-del" onclick="delCare(${c.id ? c.id : -1}, '${(c.created_at || '').replace(/'/g, '')}')">삭제</button></span>
+        </div>
+      </div>`;
+    });
+  });
+  el.innerHTML = html;
 }
-async function delCare(idx){
-  const today = new Date().toISOString().slice(0, 10);
-  const items = CARE.filter(c => (c.created_at || '').slice(0, 10) === today);
-  const c = items[idx];
-  if (!c || !confirm('이 기록을 삭제할까요?')) return;
+async function delCare(id, createdAt){
+  if (!confirm('이 기록을 삭제할까요?')) return;
+  const idx = CARE.findIndex(c => (id > 0 && String(c.id) === String(id)) || (id <= 0 && c.created_at === createdAt));
+  if (idx < 0) return;
+  const c = CARE[idx];
   if (DB_ON && c.id) {
     try {
       const r = await fetch(SUPA_URL + '/rest/v1/mel_care?id=eq.' + c.id, {method: 'DELETE', headers: H});
       if (!r.ok) { toast('삭제 실패'); return; }
     } catch (e) { toast('네트워크 오류'); return; }
   }
-  CARE.splice(CARE.indexOf(c), 1);
-  localStorage.setItem('mel_care', JSON.stringify(CARE.slice(0, 300)));
-  renderCare(); renderStats();
+  CARE.splice(idx, 1);
+  localStorage.setItem('mel_care', JSON.stringify(CARE.slice(0, 400)));
+  renderCare();
 }
+// ═══ 시간 직접 설정 ═══
+let tsKind = '모유', tsDetail = '';
+function openTimeSheet(kind){
+  tsKind = kind; tsDetail = '';
+  document.querySelectorAll('#timeSheet .ts-detail button').forEach(b => b.classList.remove('on'));
+  document.getElementById('tsTitle').textContent = careIcon(kind) + ' ' + kind + ' — 시간 정해서 기록';
+  document.getElementById('tsDetailRow').style.display = (kind === '모유') ? 'flex' : 'none';
+  const n = new Date();
+  document.getElementById('tsDate').value = n.toISOString().slice(0, 10);
+  document.getElementById('tsHour').value = String(n.getHours()).padStart(2, '0');
+  document.getElementById('tsMin').value = String(Math.floor(n.getMinutes() / 5) * 5).padStart(2, '0');
+  document.getElementById('timeSheet').classList.add('show');
+}
+function closeTimeSheet(){ document.getElementById('timeSheet').classList.remove('show'); }
+function tsPickDetail(btn, d){
+  tsDetail = d;
+  document.querySelectorAll('#timeSheet .ts-detail button').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+async function tsSave(){
+  const d = document.getElementById('tsDate').value;
+  const h = document.getElementById('tsHour').value;
+  const m = document.getElementById('tsMin').value;
+  if (!d || h === '' || m === '') { toast('시간을 확인해주세요'); return; }
+  const when = new Date(d + 'T' + h + ':' + m + ':00');
+  if (isNaN(when.getTime())) { toast('시간을 확인해주세요'); return; }
+  closeTimeSheet();
+  await addCare(tsKind, tsDetail, when.toISOString());
+}
+function openQuickSheet(){
+  const kinds = ['모유','분유','이유식','소변','대변','수면','약'];
+  document.getElementById('quickGrid').innerHTML = kinds.map(k => `<button class="qk-btn" style="background:${CAT_COLOR[k]}22;border-color:${CAT_COLOR[k]}" onclick="closeQuick(); openTimeSheet('${k}')">${careIcon(k)} ${k}</button>`).join('');
+  document.getElementById('quickSheet').classList.add('show');
+}
+function closeQuick(){ document.getElementById('quickSheet').classList.remove('show'); }
+
 // ═══════════ 통계 ═══════════
 function renderStats(){
   const sum = document.getElementById('statsSummary');
-  const bars = document.getElementById('statsBars');
-  const hours = document.getElementById('statsHours');
   if (!sum) return;
   const now = Date.now();
   const week = CARE.filter(c => now - new Date(c.created_at).getTime() < 7 * 86400000);
   const kinds = ['모유','분유','이유식','수면','소변','대변','약'];
   const counts = {};
   kinds.forEach(k => counts[k] = week.filter(c => c.kind === k).length);
-  sum.innerHTML = `<div class="stat-row"><span>🤱 모유</span><b>${counts['모유']}회</b></div>
+  const totalFeed = counts['모유'] + counts['분유'] + counts['이유식'];
+  sum.innerHTML = `<div class="stat-row"><span>🍽️ 수유 합계</span><b>${totalFeed}회</b></div>
+    <div class="stat-row"><span>🤱 모유</span><b>${counts['모유']}회</b></div>
     <div class="stat-row"><span>🍼 분유</span><b>${counts['분유']}회</b></div>
     <div class="stat-row"><span>🥣 이유식</span><b>${counts['이유식']}회</b></div>
     <div class="stat-row"><span>💧 소변</span><b>${counts['소변']}회</b></div>
     <div class="stat-row"><span>💩 대변</span><b>${counts['대변']}회</b></div>
-    <div class="stat-row"><span>😴 수면</span><b>${counts['수면']}회</b></div>`;
-  // 요일별 수유(모유+분유) 막대
+    <div class="stat-row"><span>😴 수면</span><b>${counts['수면']}회</b></div>
+    <div class="stat-row"><span>💊 약</span><b>${counts['약']}회</b></div>
+    <div class="stat-row" style="border-top:1px solid var(--line)"><span>하루 평균 수유</span><b>${(totalFeed / 7).toFixed(1)}회</b></div>`;
+  // 요일별
   const dayLabels = ['일','월','화','수','목','금','토'];
   const dayCounts = [0,0,0,0,0,0,0];
   week.forEach(c => {
-    if (c.kind === '모유' || c.kind === '분유') {
-      const d = new Date(c.created_at);
-      dayCounts[d.getDay()]++;
-    }
+    if (['모유','분유','이유식'].includes(c.kind)) dayCounts[new Date(c.created_at).getDay()]++;
   });
   const maxD = Math.max(...dayCounts, 1);
-  bars.innerHTML = dayCounts.map((n, i) => `<div class="sbar-wrap"><div class="sbar-label"><span>${dayLabels[i]}요일</span><span>${n}회</span></div><div class="sbar"><div style="width:${Math.round(n / maxD * 100)}%"></div></div></div>`).join('');
-  // 시간대 히트맵 (최근 14일 수유)
-  const fortnight = CARE.filter(c => now - new Date(c.created_at).getTime() < 14 * 86400000 && (c.kind === '모유' || c.kind === '분유'));
+  document.getElementById('statsBars').innerHTML = dayCounts.map((n, i) => `<div class="sbar-wrap"><div class="sbar-label"><span>${dayLabels[i]}요일</span><span>${n}회</span></div><div class="sbar"><div style="width:${Math.round(n / maxD * 100)}%"></div></div></div>`).join('');
+  // 시간대 히트맵
+  const fortnight = CARE.filter(c => now - new Date(c.created_at).getTime() < 14 * 86400000 && ['모유','분유','이유식'].includes(c.kind));
   const hourCounts = Array(24).fill(0);
   fortnight.forEach(c => hourCounts[new Date(c.created_at).getHours()]++);
   const maxH = Math.max(...hourCounts, 1);
-  hours.innerHTML = Array.from({length: 24}, (_, h) => {
+  document.getElementById('statsHours').innerHTML = Array.from({length: 24}, (_, h) => {
     const lv = hourCounts[h] === 0 ? 0 : Math.min(4, Math.ceil(hourCounts[h] / maxH * 4));
     return `<div class="hour-cell${lv ? ' lv' + lv : ''}" title="${h}시 ${hourCounts[h]}회"></div>`;
-  }).join('') + Array.from({length: 24}, (_, h) => `<div class="hour-labels" style="display:contents"></div>`).slice(0, 0) + `<div style="display:grid;grid-template-columns:repeat(12,1fr);font-size:8px;color:var(--sub);margin-top:2px">${Array.from({length: 12}, (_, i) => `<div style="text-align:center">${i * 2}시</div>`).join('')}</div>`;
+  }).join('');
+  document.getElementById('hourLabels').innerHTML = `<div style="display:grid;grid-template-columns:repeat(12,1fr);font-size:8px;color:var(--sub);margin-top:2px">${Array.from({length: 12}, (_, i) => `<div style="text-align:center">${i * 2}시</div>`).join('')}</div>`;
+  // 수유 간격 (최근 10회)
+  const feeds = CARE.filter(c => ['모유','분유','이유식'].includes(c.kind)).slice(0, 10).sort((a, b) => a.created_at.localeCompare(b.created_at));
+  const gaps = [];
+  for (let i = 1; i < feeds.length; i++) {
+    gaps.push((new Date(feeds[i].created_at) - new Date(feeds[i - 1].created_at)) / 3600000);
+  }
+  const gapEl = document.getElementById('statsInterval');
+  if (gaps.length) {
+    const avg = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+    gapEl.innerHTML = `<div class="stat-row"><span>평균 간격</span><b>${avg.toFixed(1)}시간</b></div>
+      <div class="stat-row"><span>최短</span><b>${Math.min(...gaps).toFixed(1)}시간</b></div>
+      <div class="stat-row"><span>최장</span><b>${Math.max(...gaps).toFixed(1)}시간</b></div>
+      <div class="sbar-wrap" style="margin-top:8px">${gaps.slice().reverse().map((g, i) => {
+        const w = Math.min(100, Math.round(g / Math.max(...gaps) * 100));
+        const col = g >= 4 ? '#E96459' : (g >= 3 ? '#E8C26B' : '#7FC4A6');
+        return `<div class="sbar-label"><span>${g.toFixed(1)}h</span></div><div class="sbar"><div style="width:${w}%;background:${col}"></div></div>`;
+      }).join('')}</div>
+      <p class="hint" style="text-align:left">🟢 3시간 미만 · 🟡 3~4시간 · 🔴 4시간+</p>`;
+  } else {
+    gapEl.innerHTML = '<p class="hint" style="text-align:left">기록이 2회 이상 쌓이면 수유 간격을 보여줘요</p>';
+  }
+  // 일별 추이 (14일)
+  const trend = {};
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now - i * 86400000).toISOString().slice(0, 10);
+    trend[d] = 0;
+  }
+  CARE.forEach(c => {
+    const d = (c.created_at || '').slice(0, 10);
+    if (d in trend && ['모유','분유','이유식'].includes(c.kind)) trend[d]++;
+  });
+  const tVals = Object.values(trend);
+  const maxT = Math.max(...tVals, 1);
+  document.getElementById('statsTrend').innerHTML = Object.entries(trend).map(([d, n]) => {
+    const dd = new Date(d + 'T00:00:00');
+    return `<div class="sbar-wrap"><div class="sbar-label"><span>${dd.getMonth() + 1}/${dd.getDate()} <span style="color:var(--pink-d)">D+${ddayOf(d)}</span></span><span>${n}회</span></div><div class="sbar"><div style="width:${Math.round(n / maxT * 100)}%"></div></div></div>`;
+  }).join('');
 }
 
 // ═══════════ 프로필/아이콘 설정 ═══════════
@@ -831,6 +999,14 @@ function init(){
   document.getElementById('dateInput').max = today;
   loadData();
 }
+// 시간설정 옵션 채우기
+(function(){
+  const h = document.getElementById('tsHour'), m = document.getElementById('tsMin');
+  if (!h) return;
+  for (let i = 0; i < 24; i++) h.add(new Option(String(i).padStart(2, '0') + '시', String(i).padStart(2, '0')));
+  for (let i = 0; i < 60; i += 5) m.add(new Option(String(i).padStart(2, '0') + '분', String(i).padStart(2, '0')));
+})();
+
 // 설정 복원 (아이콘/프로필)
 (function(){ const ic = localStorage.getItem(ICON_KEY); if(ic) applyIcon(ic); updateProfileBtn(); })();
 
