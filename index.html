@@ -154,6 +154,23 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 #quickSheet{position:fixed;inset:0;background:rgba(60,40,30,.55);z-index:160;display:none;align-items:flex-end;justify-content:center}
 #quickSheet.show{display:flex}
 .qk-btn{border:2px solid;border-radius:14px;padding:16px 4px;font-size:12.5px;font-weight:bold;cursor:pointer}
+/* 상세 기록 시트 */
+#detailSheet{position:fixed;inset:0;background:rgba(60,40,30,.55);z-index:165;display:none;align-items:flex-end;justify-content:center}
+#detailSheet.show{display:flex}
+.now-btn{flex:0 0 auto;background:var(--cream2);border:2px solid var(--pink);color:var(--pink-d);border-radius:10px;padding:8px 10px;font-size:11.5px;font-weight:bold;cursor:pointer}
+.stepper{display:flex;align-items:center;gap:10px;flex:1}
+.stepper button{width:34px;height:34px;border-radius:50%;border:none;background:#F3E4B8;color:var(--ink);font-size:17px;font-weight:bold;cursor:pointer}
+.stepper b{font-size:20px;min-width:34px;text-align:center}
+.stepper small{color:var(--sub);font-size:11px}
+.amt-quick{display:flex;gap:4px;flex:0 0 auto}
+.amt-quick button{background:var(--cream);border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-size:11px;font-weight:bold;cursor:pointer}
+.ds-lr{display:none;gap:8px;margin-bottom:12px}
+.ds-lr.on{display:flex}
+.lr-card{flex:1;background:var(--cream);border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.lr-card small{font-size:11px;color:var(--sub);font-weight:bold}
+.ds-actions{display:flex;gap:8px;margin-top:14px}
+.ds-cancel{flex:1;padding:13px;border:2px solid var(--line);background:var(--white);border-radius:14px;font-size:14px;font-weight:bold;cursor:pointer}
+.ds-save{flex:2;padding:13px;background:var(--pink);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:bold;cursor:pointer}
 
 /* ── 프로필/설정 ── */
 .profile-btn{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:15px;cursor:pointer;margin-right:8px}
@@ -249,12 +266,12 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
     <button class="pat-btn" onclick="showTab('stats')">📊 통계 패턴</button>
   </div>
   <div class="cat-row">
-    <div class="cat-btn c-bm" onclick="addCare('모유')"><span class="cat-ico">🤱</span>모유</div>
-    <div class="cat-btn c-fm" onclick="addCare('분유')"><span class="cat-ico">🍼</span>분유</div>
-    <div class="cat-btn c-food" onclick="addCare('이유식')"><span class="cat-ico">🥣</span>이유식</div>
+    <div class="cat-btn c-bm" onclick="openDetail('모유')"><span class="cat-ico">🤱</span>모유</div>
+    <div class="cat-btn c-fm" onclick="openDetail('분유')"><span class="cat-ico">🍼</span>분유</div>
+    <div class="cat-btn c-food" onclick="openDetail('이유식')"><span class="cat-ico">🥣</span>이유식</div>
     <div class="cat-btn c-pee" onclick="addCare('소변')"><span class="cat-ico">💧</span>소변</div>
     <div class="cat-btn c-poop" onclick="addCare('대변')"><span class="cat-ico">💩</span>대변</div>
-    <div class="cat-btn c-sleep" onclick="addCare('수면')"><span class="cat-ico">😴</span>수면</div>
+    <div class="cat-btn c-sleep" onclick="openDetail('수면')"><span class="cat-ico">😴</span>수면</div>
     <div class="cat-btn c-med" onclick="addCare('약')"><span class="cat-ico">💊</span>약</div>
   </div>
   <div class="recent-strip">
@@ -323,6 +340,32 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
   <div style="background:var(--white);border-radius:22px 22px 0 0;width:100%;max-width:640px;padding:20px 18px 30px;max-height:70vh;overflow:auto">
     <h3 style="font-size:14px;color:var(--pink-d);margin-bottom:14px">⏰ 시간 정해서 기록 — 종류 선택</h3>
     <div id="quickGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+  </div>
+</div>
+
+<!-- ══ 상세 기록 시트 (쑥쑥 스타일) ══ -->
+<div id="detailSheet" onclick="if(event.target===this)closeDetail()">
+  <div style="background:var(--white);border-radius:22px 22px 0 0;width:100%;max-width:640px;padding:20px 18px 30px;max-height:88vh;overflow-y:auto">
+    <h3 id="dsTitle" style="font-size:15px;color:var(--pink-d);margin-bottom:14px">기록</h3>
+    <div class="ts-row"><label>언제</label><input type="date" id="dsDate"><select id="dsHour"></select><select id="dsMin"></select>
+      <button class="now-btn" onclick="dsNow()">지금!</button></div>
+    <div id="dsAmountRow" class="ts-row"><label id="dsAmountLabel">먹은 양</label>
+      <div class="stepper"><button onclick="dsStep('amt',-5)">−</button><b id="dsAmt">0</b><small>ml</small><button onclick="dsStep('amt',5)">＋</button></div>
+      <div class="amt-quick">
+        <button onclick="dsAmtSet(40)">40</button><button onclick="dsAmtSet(80)">80</button><button onclick="dsAmtSet(120)">120</button><button onclick="dsAmtSet(160)">160</button>
+      </div>
+    </div>
+    <div id="dsLRRow" class="ds-lr">
+      <div class="lr-card"><small>왼쪽 가슴</small>
+        <div class="stepper"><button onclick="dsStep('l',-1)">−</button><b id="dsL">0</b><small>분</small><button onclick="dsStep('l',1)">＋</button></div></div>
+      <div class="lr-card"><small>오른쪽 가슴</small>
+        <div class="stepper"><button onclick="dsStep('r',-1)">−</button><b id="dsR">0</b><small>분</small><button onclick="dsStep('r',1)">＋</button></div></div>
+    </div>
+    <div class="ts-row"><label>메모</label><input type="text" id="dsMemo" placeholder="✏️ 기록에 대한 메모" maxlength="60"></div>
+    <div class="ds-actions">
+      <button class="ds-cancel" onclick="closeDetail()">취소</button>
+      <button class="ds-save" onclick="dsSave()">저장</button>
+    </div>
   </div>
 </div>
 
@@ -710,6 +753,56 @@ async function shareDay(dateKey){
   await shareItem(PHOTOS.indexOf(photos[0]));
 }
 
+// ═══════════ 상세 기록 시트 ═══════════
+let dsKind = '분유', dsAmtV = 0, dsLV = 0, dsRV = 0;
+function openDetail(kind){
+  dsKind = kind; dsAmtV = 0; dsLV = 0; dsRV = 0;
+  document.getElementById('dsTitle').textContent = careIcon(kind) + ' ' + kind + ' 기록';
+  const showAmt = ['분유','이유식'].includes(kind);
+  const showLR = kind === '모유';
+  document.getElementById('dsAmountRow').style.display = showAmt ? 'flex' : 'none';
+  document.getElementById('dsLRRow').classList.toggle('on', showLR);
+  document.getElementById('dsAmt').textContent = '0';
+  document.getElementById('dsL').textContent = '0';
+  document.getElementById('dsR').textContent = '0';
+  document.getElementById('dsMemo').value = '';
+  dsNow();
+  document.getElementById('detailSheet').classList.add('show');
+}
+function closeDetail(){ document.getElementById('detailSheet').classList.remove('show'); }
+function dsNow(){
+  const n = new Date();
+  document.getElementById('dsDate').value = n.toISOString().slice(0, 10);
+  document.getElementById('dsHour').value = String(n.getHours()).padStart(2, '0');
+  document.getElementById('dsMin').value = String(Math.floor(n.getMinutes() / 5) * 5).padStart(2, '0');
+}
+function dsStep(f, d){
+  if (f === 'amt') { dsAmtV = Math.max(0, dsAmtV + d); document.getElementById('dsAmt').textContent = dsAmtV; }
+  if (f === 'l') { dsLV = Math.max(0, dsLV + d); document.getElementById('dsL').textContent = dsLV; }
+  if (f === 'r') { dsRV = Math.max(0, dsRV + d); document.getElementById('dsR').textContent = dsRV; }
+}
+function dsAmtSet(v){ dsAmtV = v; document.getElementById('dsAmt').textContent = v; }
+async function dsSave(){
+  const d = document.getElementById('dsDate').value;
+  const h = document.getElementById('dsHour').value;
+  const m = document.getElementById('dsMin').value;
+  if (!d || h === '' || m === '') { toast('시간을 확인해주세요'); return; }
+  const when = new Date(d + 'T' + h + ':' + m + ':00');
+  if (isNaN(when.getTime())) { toast('시간을 확인해주세요'); return; }
+  const memo = document.getElementById('dsMemo').value.trim();
+  let detail = '';
+  if (dsKind === '모유') {
+    const parts = [];
+    if (dsLV > 0) parts.push('왼쪽 ' + dsLV + '분');
+    if (dsRV > 0) parts.push('오른쪽 ' + dsRV + '분');
+    detail = parts.length ? parts.join(' · ') + ' (합 ' + (dsLV + dsRV) + '분)' : '양쪽';
+  } else if (['분유','이유식'].includes(dsKind)) {
+    detail = dsAmtV > 0 ? dsAmtV + 'ml' : '';
+  }
+  if (memo) detail = (detail ? detail + ' — ' : '') + memo;
+  closeDetail();
+  await addCare(dsKind, detail, when.toISOString());
+}
 // ═══════════ 가족 관계 ═══════════
 function getRelation(){ return localStorage.getItem('mel_relation') || ''; }
 function setRelation(r){
@@ -1002,9 +1095,18 @@ function init(){
 // 시간설정 옵션 채우기
 (function(){
   const h = document.getElementById('tsHour'), m = document.getElementById('tsMin');
+  const dh = document.getElementById('dsHour'), dm = document.getElementById('dsMin');
   if (!h) return;
-  for (let i = 0; i < 24; i++) h.add(new Option(String(i).padStart(2, '0') + '시', String(i).padStart(2, '0')));
-  for (let i = 0; i < 60; i += 5) m.add(new Option(String(i).padStart(2, '0') + '분', String(i).padStart(2, '0')));
+  for (let i = 0; i < 24; i++) {
+    const v = String(i).padStart(2, '0');
+    h.add(new Option(v + '시', v));
+    if (dh) dh.add(new Option(v + '시', v));
+  }
+  for (let i = 0; i < 60; i += 5) {
+    const v = String(i).padStart(2, '0');
+    m.add(new Option(v + '분', v));
+    if (dm) dm.add(new Option(v + '분', v));
+  }
 })();
 
 // 설정 복원 (아이콘/프로필)
