@@ -33,7 +33,7 @@ h1.logo{font-size:18px;color:var(--pink-d)}
 .dday-lab{font-size:11px;color:var(--sub)}
 /* ── 탭 ── */
 nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);display:flex;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:20}
-nav button{flex:1;padding:12px 4px 10px;border:none;background:none;font-size:11.5px;color:var(--sub);font-weight:bold}
+nav button{flex:1;padding:12px 2px 10px;border:none;background:none;font-size:10px;color:var(--sub);font-weight:bold}
 nav button .ico{display:block;font-size:20px;margin-bottom:2px}
 nav button.on{color:var(--pink-d)}
 /* ── 뷰 ── */
@@ -111,6 +111,41 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .play-badge{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:10px;padding:3px 8px;font-size:10.5px;z-index:3}
 .share-ico{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.85);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;z-index:3;cursor:pointer}
 @media(min-width:600px){.gallery{grid-template-columns:repeat(5,1fr)}}
+/* ── 수유텀 ── */
+.care-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.care-btn{border:none;border-radius:14px;padding:14px 4px;font-size:12px;font-weight:bold;color:#fff;line-height:1.35}
+.care-btn small{font-weight:normal;opacity:.85;font-size:10px}
+.care-btn.bm{background:#F2A9A0}
+.care-btn.fm{background:#E8907E}
+.care-btn.food{background:#C9A77C}
+.care-btn.sleep{background:#8FA8C9}
+.care-btn.pee{background:#8FCBB4}
+.care-btn.poop{background:#B99B72}
+.care-btn.med{background:#C58FC9}
+.care-btn:active{transform:scale(.95)}
+.care-item{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.care-item .ci-l{font-size:13px;font-weight:bold}
+.care-item .ci-r{font-size:11px;color:var(--sub);text-align:right}
+.care-item .del{background:none;border:none;color:#C77F74;font-size:11px;font-weight:bold}
+.care-item.just{animation:pop .3s ease}
+@keyframes pop{0%{transform:scale(.92);opacity:.4}100%{transform:none;opacity:1}}
+/* ── 통계 ── */
+.stats-box{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+.stat-row{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.stat-row:last-child{border:none}
+.stat-row b{color:var(--pink-d)}
+.sbar-wrap{margin:7px 0}
+.sbar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:2px}
+.sbar{height:8px;background:var(--cream2);border-radius:6px;overflow:hidden}
+.sbar>div{height:100%;background:var(--pink);border-radius:6px;transition:width .4s}
+.hour-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:2px}
+.hour-cell{aspect-ratio:1;border-radius:3px;background:var(--cream2)}
+.hour-cell.lv1{background:#F8D9D4}
+.hour-cell.lv2{background:#F2B7AE}
+.hour-cell.lv3{background:#E98F82}
+.hour-cell.lv4{background:#D96455}
+.hour-labels{display:grid;grid-template-columns:repeat(12,1fr);font-size:8px;color:var(--sub);margin-top:2px;text-align:center}
+
 /* ── 프로필/설정 ── */
 .profile-btn{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:15px;cursor:pointer;margin-right:8px}
 .tile-auth{position:absolute;left:5px;bottom:5px;width:22px;height:22px;border-radius:50%;color:#fff;font-size:11px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:2}
@@ -127,6 +162,8 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .prof-row{display:flex;gap:8px}
 .prof-row button{flex:1;padding:12px;border:2px solid var(--line);border-radius:12px;background:#FFFEFB;font-size:14px;font-weight:bold;cursor:pointer}
 .prof-row button.on{border-color:var(--pink-d);background:var(--cream2)}
+.rel-btn{flex:0 0 30%;padding:10px 4px;border:2px solid var(--line);border-radius:10px;background:#FFFEFB;font-size:12.5px;font-weight:bold;cursor:pointer}
+.rel-btn.on{border-color:var(--pink-d);background:var(--cream2);color:var(--pink-d)}
 .icon-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .icon-grid img{width:100%;aspect-ratio:1;border-radius:12px;border:2px solid transparent;cursor:pointer;display:block}
 .icon-grid img.picked{border-color:var(--pink-d)}
@@ -196,6 +233,37 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
   <div id="diaryList"></div>
 </div>
 
+<!-- ══ 수유텀 ══ -->
+<div class="view" id="v-care">
+  <div class="care-grid">
+    <button class="care-btn bm" onclick="addCare('모유','왼쪽')">🤱 모유<br><small>왼쪽</small></button>
+    <button class="care-btn bm" onclick="addCare('모유','오른쪽')">🤱 모유<br><small>오른쪽</small></button>
+    <button class="care-btn bm" onclick="addCare('모유','둘 다')">🤱 모유<br><small>둘 다</small></button>
+    <button class="care-btn fm" onclick="addCare('분유')">🍼 분유</button>
+    <button class="care-btn food" onclick="addCare('이유식')">🥣 이유식</button>
+    <button class="care-btn sleep" onclick="addCare('수면')">😴 수면</button>
+    <button class="care-btn pee" onclick="addCare('소변')">💧 소변</button>
+    <button class="care-btn poop" onclick="addCare('대변')">💩 대변</button>
+    <button class="care-btn med" onclick="addCare('약')">💊 약</button>
+  </div>
+  <p class="hint">누르면 바로 기록돼요 · 다시 누르면 취소</p>
+  <div id="careList"></div>
+</div>
+
+<!-- ══ 통계 ══ -->
+<div class="view" id="v-stats">
+  <div class="stats-box">
+    <h3 style="color:var(--pink-d);font-size:14px;margin-bottom:8px">📈 최근 7일</h3>
+    <div id="statsSummary"></div>
+    <div id="statsBars"></div>
+  </div>
+  <div class="stats-box">
+    <h3 style="color:var(--pink-d);font-size:14px;margin-bottom:8px">🕐 시간대 패턴 (수유)</h3>
+    <div id="statsHours" class="hour-grid"></div>
+    <p class="hint">진한 칸 = 자주 수유한 시간대 (최근 14일)</p>
+  </div>
+</div>
+
 <!-- ══ 달력 ══ -->
 <div class="view" id="v-cal">
   <div class="cal-head">
@@ -228,6 +296,18 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
       <button onclick="selectProfile('아빠')" id="pb-아빠">👨 아빠</button>
       <button onclick="selectProfile('엄마')" id="pb-엄마">👩 엄마</button>
     </div>
+    <div class="sec">👨‍👩‍👧 가족 관계</div>
+    <p style="font-size:12px;color:var(--sub);margin-bottom:8px" id="familyRelNow"></p>
+    <div class="prof-row" style="flex-wrap:wrap;gap:6px">
+      <button onclick="setRelation('아빠')" class="rel-btn">아빠</button>
+      <button onclick="setRelation('엄마')" class="rel-btn">엄마</button>
+      <button onclick="setRelation('할아버지')" class="rel-btn">할아버지</button>
+      <button onclick="setRelation('할머니')" class="rel-btn">할머니</button>
+      <button onclick="setRelation('외할머니')" class="rel-btn">외할머니</button>
+      <button onclick="setRelation('고모')" class="rel-btn">고모</button>
+      <button onclick="setRelation('삼촌')" class="rel-btn">삼촌</button>
+      <button onclick="setRelation('가족')" class="rel-btn">가족</button>
+    </div>
     <div class="sec">🖼️ 앱 아이콘 (홈 화면)</div>
     <div class="icon-grid" id="iconGrid"></div>
     <div class="icon-up" onclick="document.getElementById('iconFile').click()">📷 내 사진으로 아이콘 만들기</div>
@@ -239,7 +319,9 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 
 <nav>
   <button class="on" onclick="showTab('album')"><span class="ico">📖</span>앨범</button>
-  <button onclick="showTab('upload')"><span class="ico">📸</span>기록</button>
+  <button onclick="showTab('care')"><span class="ico">🍼</span>수유텀</button>
+  <button onclick="showTab('stats')"><span class="ico">📊</span>통계</button>
+  <button onclick="showTab('upload')"><span class="ico">📸</span>사진</button>
   <button onclick="showTab('diary')"><span class="ico">✏️</span>일기</button>
   <button onclick="showTab('cal')"><span class="ico">🗓️</span>달력</button>
 </nav>
@@ -293,6 +375,8 @@ function showTab(name){
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('on'));
   event.currentTarget.classList.add('on');
   if (name === 'cal') renderCal();
+  if (name === 'care') { loadCare(); }
+  if (name === 'stats') { loadCare(); setTimeout(renderStats, 600); }
   if (name === 'diary') refreshDiary();
 }
 
@@ -576,10 +660,131 @@ async function shareDay(dateKey){
   await shareItem(PHOTOS.indexOf(photos[0]));
 }
 
+// ═══════════ 가족 관계 ═══════════
+function getRelation(){ return localStorage.getItem('mel_relation') || ''; }
+function setRelation(r){
+  localStorage.setItem('mel_relation', r);
+  toast(r + '(으)로 설정 — 이제 기록에 ' + r + ' 표시가 붙어요 💗');
+  renderRelation();
+  updateProfileBtn();
+}
+function renderRelation(){
+  const r = getRelation();
+  const el = document.getElementById('familyRelNow');
+  if (el) el.textContent = r ? ('현재: ' + r + ' 👋') : '이 기기의 관계를 선택하세요';
+  document.querySelectorAll('.rel-btn').forEach(b => b.classList.toggle('on', b.textContent.trim() === r));
+}
+
+// ═══════════ 수유텀 ═══════════
+let CARE = [];
+function careIcon(k){ return {'모유':'🤱','분유':'🍼','이유식':'🥣','수면':'😴','소변':'💧','대변':'💩','약':'💊'}[k] || '•'; }
+async function addCare(kind, detail){
+  const now = new Date();
+  const item = {kind, detail: detail || '', memo: '', created_at: now.toISOString(), by: getProfile() || ''};
+  if (DB_ON) {
+    try {
+      const r = await fetch(SUPA_URL + '/rest/v1/mel_care', {
+        method: 'POST', headers: H,
+        body: JSON.stringify({kind: kind, detail: item.detail, memo: '', by: item.by})
+      });
+      if (r.ok) {
+        // 서버 저장 성공 — id 수령
+        const rows = await r.json().catch(() => []);
+        if (rows && rows[0] && rows[0].id) item.id = rows[0].id;
+      }
+      // 실패 시에도 로컬 저장 (나중에 동기화 대상) — 기록은 절대 안 잃게
+    } catch (e) { /* 오프라인 — 로컬 저장 */ }
+  }
+  CARE.unshift(item);
+  localStorage.setItem('mel_care', JSON.stringify(CARE.slice(0, 300)));
+  toast(careIcon(kind) + ' ' + kind + (detail ? ' · ' + detail : '') + ' 기록 💗');
+  renderCare();
+}
+async function loadCare(){
+  if (DB_ON) {
+    try {
+      const r = await fetch(SUPA_URL + '/rest/v1/mel_care?order=created_at.desc&limit=200', {headers: H});
+      if (r.ok) { CARE = await r.json(); localStorage.setItem('mel_care', JSON.stringify(CARE.slice(0, 300))); }
+    } catch (e) {}
+  } else {
+    CARE = JSON.parse(localStorage.getItem('mel_care') || '[]');
+  }
+  renderCare();
+}
+function renderCare(){
+  const el = document.getElementById('careList');
+  if (!el) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const items = CARE.filter(c => (c.created_at || '').slice(0, 10) === today);
+  if (!items.length) {
+    el.innerHTML = '<div class="empty" style="padding:30px 16px">오늘의 기록이 아직 없어요<br>위 버튼을 눌러 바로 남겨보세요 🍼</div>';
+    return;
+  }
+  el.innerHTML = items.map((c, i) => {
+    const t = (c.created_at || '').slice(11, 16);
+    const who = c.by ? ` <span class="auth-chip ${c.by === '아빠' ? 'ab' : 'em'}">${c.by}</span>` : '';
+    const dd = ddayOf(today);
+    return `<div class="care-item just"><span class="ci-l">${careIcon(c.kind)} ${c.kind}${c.detail ? ' · ' + c.detail : ''}${who}</span><span class="ci-r">D+${dd} · ${t}<br><button class="del" onclick="delCare(${i})">삭제</button></span></div>`;
+  }).join('');
+}
+async function delCare(idx){
+  const today = new Date().toISOString().slice(0, 10);
+  const items = CARE.filter(c => (c.created_at || '').slice(0, 10) === today);
+  const c = items[idx];
+  if (!c || !confirm('이 기록을 삭제할까요?')) return;
+  if (DB_ON && c.id) {
+    try {
+      const r = await fetch(SUPA_URL + '/rest/v1/mel_care?id=eq.' + c.id, {method: 'DELETE', headers: H});
+      if (!r.ok) { toast('삭제 실패'); return; }
+    } catch (e) { toast('네트워크 오류'); return; }
+  }
+  CARE.splice(CARE.indexOf(c), 1);
+  localStorage.setItem('mel_care', JSON.stringify(CARE.slice(0, 300)));
+  renderCare(); renderStats();
+}
+// ═══════════ 통계 ═══════════
+function renderStats(){
+  const sum = document.getElementById('statsSummary');
+  const bars = document.getElementById('statsBars');
+  const hours = document.getElementById('statsHours');
+  if (!sum) return;
+  const now = Date.now();
+  const week = CARE.filter(c => now - new Date(c.created_at).getTime() < 7 * 86400000);
+  const kinds = ['모유','분유','이유식','수면','소변','대변','약'];
+  const counts = {};
+  kinds.forEach(k => counts[k] = week.filter(c => c.kind === k).length);
+  sum.innerHTML = `<div class="stat-row"><span>🤱 모유</span><b>${counts['모유']}회</b></div>
+    <div class="stat-row"><span>🍼 분유</span><b>${counts['분유']}회</b></div>
+    <div class="stat-row"><span>🥣 이유식</span><b>${counts['이유식']}회</b></div>
+    <div class="stat-row"><span>💧 소변</span><b>${counts['소변']}회</b></div>
+    <div class="stat-row"><span>💩 대변</span><b>${counts['대변']}회</b></div>
+    <div class="stat-row"><span>😴 수면</span><b>${counts['수면']}회</b></div>`;
+  // 요일별 수유(모유+분유) 막대
+  const dayLabels = ['일','월','화','수','목','금','토'];
+  const dayCounts = [0,0,0,0,0,0,0];
+  week.forEach(c => {
+    if (c.kind === '모유' || c.kind === '분유') {
+      const d = new Date(c.created_at);
+      dayCounts[d.getDay()]++;
+    }
+  });
+  const maxD = Math.max(...dayCounts, 1);
+  bars.innerHTML = dayCounts.map((n, i) => `<div class="sbar-wrap"><div class="sbar-label"><span>${dayLabels[i]}요일</span><span>${n}회</span></div><div class="sbar"><div style="width:${Math.round(n / maxD * 100)}%"></div></div></div>`).join('');
+  // 시간대 히트맵 (최근 14일 수유)
+  const fortnight = CARE.filter(c => now - new Date(c.created_at).getTime() < 14 * 86400000 && (c.kind === '모유' || c.kind === '분유'));
+  const hourCounts = Array(24).fill(0);
+  fortnight.forEach(c => hourCounts[new Date(c.created_at).getHours()]++);
+  const maxH = Math.max(...hourCounts, 1);
+  hours.innerHTML = Array.from({length: 24}, (_, h) => {
+    const lv = hourCounts[h] === 0 ? 0 : Math.min(4, Math.ceil(hourCounts[h] / maxH * 4));
+    return `<div class="hour-cell${lv ? ' lv' + lv : ''}" title="${h}시 ${hourCounts[h]}회"></div>`;
+  }).join('') + Array.from({length: 24}, (_, h) => `<div class="hour-labels" style="display:contents"></div>`).slice(0, 0) + `<div style="display:grid;grid-template-columns:repeat(12,1fr);font-size:8px;color:var(--sub);margin-top:2px">${Array.from({length: 12}, (_, i) => `<div style="text-align:center">${i * 2}시</div>`).join('')}</div>`;
+}
+
 // ═══════════ 프로필/아이콘 설정 ═══════════
 const PROFILE_KEY = 'mel_profile', ICON_KEY = 'mel_icon';
 const MANIFEST_BASE = {name:'멜버니의 걸음마', short_name:'멜버니', description:'우리 가족만의 성장 앨범', start_url:'./', display:'standalone', orientation:'portrait', background_color:'#FDF6EE', theme_color:'#F7C8C0'};
-function getProfile(){ return localStorage.getItem(PROFILE_KEY) || ''; }
+function getProfile(){ return localStorage.getItem('mel_relation') || localStorage.getItem(PROFILE_KEY) || ''; }
 function parseAuthor(m){ if(!m) return {a:'', t:''}; const i = m.indexOf('|'); if(i > 0 && (m.slice(0, i) === '아빠' || m.slice(0, i) === '엄마')) return {a: m.slice(0, i), t: m.slice(i + 1)}; return {a: '', t: m}; }
 function authBadge(m){ const a = parseAuthor(m).a; return a ? `<span class="tile-auth ${a === '아빠' ? 'ab' : 'em'}">${a === '아빠' ? '아' : '엄'}</span>` : ''; }
 function authChip(a){ return a ? `<span class="auth-chip ${a === '아빠' ? 'ab' : 'em'}">${a}</span>` : ''; }
@@ -592,7 +797,7 @@ function renderIconGrid(){ const g = document.getElementById('iconGrid'); if(!g)
 function pickIcon(url){ try{ localStorage.setItem(ICON_KEY, url); }catch(e){} applyIcon(url); renderIconGrid(); toast('아이콘 설정 완료 — 홈 화면에 다시 추가해보세요 💗'); }
 function applyIcon(url){ try{ let l = document.querySelector('link[rel="icon"]'); if(l) l.href = url; let a = document.querySelector('link[rel="apple-touch-icon"]'); if(a) a.href = url; const mf = Object.assign({}, MANIFEST_BASE, {icons:[{src:url, sizes:'192x192', type:'image/png'},{src:url, sizes:'512x512', type:'image/png'}]}); const blob = new Blob([JSON.stringify(mf)], {type:'application/json'}); if(window._mfURL) URL.revokeObjectURL(window._mfURL); window._mfURL = URL.createObjectURL(blob); let m = document.querySelector('link[rel="manifest"]'); if(m) m.href = window._mfURL; }catch(e){} }
 document.getElementById('iconFile').addEventListener('change', function(){ const f = this.files[0]; if(!f) return; const rd = new FileReader(); rd.onload = ev => { const img = new Image(); img.onload = () => { const s = Math.min(img.width, img.height); const c = document.createElement('canvas'); c.width = c.height = 192; c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, 192, 192); pickIcon(c.toDataURL('image/png')); }; img.src = ev.target.result; }; rd.readAsDataURL(f); this.value = ''; });
-function openSettings(){ renderProfileSel(); renderIconGrid(); document.getElementById('setModal').classList.add('show'); }
+function openSettings(){ renderProfileSel(); renderIconGrid(); renderRelation(); document.getElementById('setModal').classList.add('show'); }
 function closeSettings(){ document.getElementById('setModal').classList.remove('show'); }
 
 // ═══════════ 유틸 ═══════════
