@@ -111,6 +111,13 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .play-badge{position:absolute;right:8px;top:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:10px;padding:3px 8px;font-size:10.5px;z-index:3}
 .share-ico{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.85);border:none;border-radius:10px;width:30px;height:30px;font-size:14px;z-index:3;cursor:pointer}
 @media(min-width:600px){.gallery{grid-template-columns:repeat(5,1fr)}}
+/* ── 리듬 요약 2×2 ── */
+.rhythm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.rh-card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px}
+.rh-head{font-size:11.5px;font-weight:bold;color:var(--sub);margin-bottom:5px}
+.rh-val{font-size:19px;font-weight:bold;color:var(--pink-d)}
+.rh-sub{font-size:10.5px;color:var(--sub);margin-top:4px;line-height:1.5}
+
 /* ── 통계 탭/시계차트 ── */
 .st-tabs{display:flex;gap:6px;margin-bottom:12px}
 .st-tabs button{flex:1;padding:11px;border:none;border-radius:12px;background:var(--white);border:1px solid var(--line);font-size:13px;font-weight:bold;color:var(--sub)}
@@ -323,6 +330,13 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
     <div class="clock-hours">0 2 4 6 8 10 12 14 16 18 20 22</div>
     <div class="day-summary" id="stTodaySummary" style="margin-top:8px"></div>
     <div class="flow-card" id="stFlow"></div>
+    <h3 style="font-size:13px;color:var(--pink-d);margin:14px 0 8px">리듬 요약</h3>
+    <div class="rhythm-grid">
+      <div class="rh-card"><div class="rh-head">😴 수면</div><div class="rh-val" id="rhSleep">-</div><div class="rh-sub" id="rhSleepSub">기록 없음</div></div>
+      <div class="rh-card"><div class="rh-head">🍼 수유·식사</div><div class="rh-val" id="rhFeed">-</div><div class="rh-sub" id="rhFeedSub">기록 없음</div></div>
+      <div class="rh-card"><div class="rh-head">🚽 배변</div><div class="rh-val" id="rhPoo">-</div><div class="rh-sub" id="rhPooSub">기록 없음</div></div>
+      <div class="rh-card"><div class="rh-head">💊 약</div><div class="rh-val" id="rhMed">-</div><div class="rh-sub" id="rhMedSub">기록 없음</div></div>
+    </div>
   </div>
 
   <!-- 주간: 요약+간격+히트맵 -->
@@ -1100,6 +1114,42 @@ function renderStatsToday(key){
     if (f) flow += `<br>마지막 수유는 <b>${fmt12(f.created_at)}</b>${f.detail ? ' (' + f.detail + ')' : ''}.`;
   }
   document.getElementById('stFlow').innerHTML = flow;
+  // ═ 리듬 요약 2×2 ═
+  const setT = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  // 수면
+  const sleeps = items.filter(c => c.kind === '수면');
+  setT('rhSleep', sleeps.length ? sleeps.length + '회' : '-');
+  setT('rhSleepSub', sleeps.length ? '마지막 · ' + fmt12(sleeps[0].created_at) : '기록 없음');
+  // 수유·식사: 회수 + 총량(ml 파싱) + 총시간(합 N분 파싱) + 최근 간격
+  const feeds2 = items.filter(c => ['모유','분유','이유식'].includes(c.kind)).sort((a, b) => b.created_at.localeCompare(a.created_at));
+  setT('rhFeed', feeds2.length ? feeds2.length + '회' : '-');
+  if (feeds2.length) {
+    let totMl = 0, totMin = 0;
+    feeds2.forEach(f => {
+      const ml = (f.detail || '').match(/(\d+)\s*ml/i);
+      if (ml) totMl += parseInt(ml[1]);
+      const mn = (f.detail || '').match(/합\s*(\d+)\s*분/);
+      if (mn) totMin += parseInt(mn[1]);
+    });
+    let sub = [];
+    if (totMl) sub.push('총 ' + totMl + 'ml');
+    if (totMin) sub.push('총 ' + totMin + '분');
+    if (feeds2.length >= 2) {
+      const gapH = (new Date(feeds2[0].created_at) - new Date(feeds2[1].created_at)) / 3600000;
+      sub.push('간격 ' + (gapH < 1 ? Math.round(gapH * 60) + '분' : gapH.toFixed(1) + '시간'));
+    }
+    sub.push('최근 ' + ago(feeds2[0].created_at));
+    setT('rhFeedSub', sub.join(' · '));
+  }
+  // 배변
+  const pees = items.filter(c => c.kind === '소변').length;
+  const poos = items.filter(c => c.kind === '대변').length;
+  setT('rhPoo', (pees + poos) ? (pees + poos) + '회' : '-');
+  setT('rhPooSub', (pees + poos) ? '💧소변 ' + pees + ' · 💩대변 ' + poos : '기록 없음');
+  // 약
+  const meds = items.filter(c => c.kind === '약');
+  setT('rhMed', meds.length ? meds.length + '회' : '-');
+  setT('rhMedSub', meds.length ? '마지막 · ' + fmt12(meds[0].created_at) : '기록 없음');
 }
 
 
