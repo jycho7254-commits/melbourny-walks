@@ -123,7 +123,7 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .st-tabs{display:flex;gap:6px;margin-bottom:12px}
 .st-tabs button{flex:1;padding:11px;border:none;border-radius:12px;background:var(--white);border:1px solid var(--line);font-size:13px;font-weight:bold;color:var(--sub)}
 .st-tabs button.on{background:var(--pink);color:#fff;border-color:var(--pink)}
-.date-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.date-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:relative}
 .date-nav b{font-size:14px}
 .date-nav button{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:6px 14px;font-size:12px;color:var(--sub)}
 .cat-mini-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
@@ -144,7 +144,8 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .f-btn.on{border-color:var(--pink-d);background:var(--cream2);color:var(--pink-d)}
 
 /* ── 수유텀 (쑥쑥 스타일) ── */
-.dday-strip{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dday-strip{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;position:relative}
+.pat-btn.on-date{background:var(--pink);color:#fff;border-color:var(--pink)}
 .dday-strip span{font-size:17px;font-weight:bold;color:var(--pink-d)}
 .pat-btn{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:7px 14px;font-size:12px;font-weight:bold;color:var(--pink-d)}
 .cat-row{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;-webkit-overflow-scrolling:touch}
@@ -296,7 +297,12 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 <div class="view" id="v-care">
   <div class="dday-strip">
     <span id="careDday">D+0</span>
-    <button class="pat-btn" onclick="showTab('stats')">📊 통계 패턴</button>
+    <div style="display:flex;gap:6px">
+      <button class="pat-btn" onclick="carePrev()" id="carePrevBtn" style="display:none">◀ 전체</button>
+      <button class="pat-btn" id="careDateBtn" onclick="document.getElementById('careDateInput').showPicker()">📅 <span id="careDateLbl">오늘</span></button>
+      <button class="pat-btn" onclick="showTab('stats')">📊 통계</button>
+    </div>
+    <input type="date" id="careDateInput" onchange="carePick(this.value)" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
   </div>
   <div class="cat-row">
     <div class="cat-btn c-bm" onclick="openDetail('모유')"><span class="cat-ico">🤱</span>모유</div>
@@ -324,8 +330,9 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
   </div>
   <div class="date-nav">
     <button onclick="stMove(-1)">◀</button>
-    <b id="stDate">오늘</b>
+    <b id="stDate" style="cursor:pointer" onclick="document.getElementById('stDateInput').showPicker()">오늘</b>
     <button onclick="stMove(1)">▶</button>
+    <input type="date" id="stDateInput" onchange="stPick(this.value)" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
   </div>
 
   <!-- 오늘: 시계형 24h -->
@@ -874,9 +881,15 @@ function openDetail(kind){
 function closeDetail(){ document.getElementById('detailSheet').classList.remove('show'); }
 function dsNow(){
   const n = new Date();
-  document.getElementById('dsDate').value = n.toISOString().slice(0, 10);
-  document.getElementById('dsHour').value = String(n.getHours()).padStart(2, '0');
-  document.getElementById('dsMin').value = String(Math.floor(n.getMinutes() / 5) * 5).padStart(2, '0');
+  const base = careViewDate || n.toISOString().slice(0, 10);
+  document.getElementById('dsDate').value = base;
+  if (careViewDate) {
+    document.getElementById('dsHour').value = '12';
+    document.getElementById('dsMin').value = '00';
+  } else {
+    document.getElementById('dsHour').value = String(n.getHours()).padStart(2, '0');
+    document.getElementById('dsMin').value = String(Math.floor(n.getMinutes() / 5) * 5).padStart(2, '0');
+  }
 }
 function dsStep(f, d){
   if (f === 'amt') { dsAmtV = Math.max(0, dsAmtV + d); document.getElementById('dsAmt').textContent = dsAmtV; }
@@ -918,6 +931,26 @@ function renderRelation(){
   const el = document.getElementById('familyRelNow');
   if (el) el.textContent = r ? ('현재: ' + r + ' 👋') : '이 기기의 관계를 선택하세요';
   document.querySelectorAll('.rel-btn').forEach(b => b.classList.toggle('on', b.textContent.trim() === r));
+}
+
+// ═══ 수유텀 조회 날짜 ═══
+let careViewDate = null;
+function fmtDateLbl(key){
+  const d = new Date(key + 'T00:00:00');
+  const today = new Date().toISOString().slice(0, 10);
+  const yest = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const dl = ['일','월','화','수','목','금','토'];
+  if (key === today) return '오늘';
+  if (key === yest) return '어제';
+  return (d.getMonth() + 1) + '/' + d.getDate();
+}
+function carePick(key){
+  careViewDate = key || null;
+  renderCare();
+}
+function carePrev(){
+  careViewDate = null;
+  renderCare();
 }
 
 // ═══════════ 수유텀 ═══════════
@@ -963,11 +996,16 @@ async function loadCare(){
     try {
       const r = await fetch(SUPA_URL + '/rest/v1/mel_care?order=created_at.desc&limit=400', {headers: H});
       if (r.ok) { CARE = await r.json(); localStorage.setItem('mel_care', JSON.stringify(CARE.slice(0, 400))); }
-    } catch (e) {}
+      else throw 0;
+    } catch (e) {
+      // 서버 장애 — 로컬 캐시 폴백
+      CARE = JSON.parse(localStorage.getItem('mel_care') || '[]');
+    }
   } else {
     CARE = JSON.parse(localStorage.getItem('mel_care') || '[]');
   }
   renderCare();
+  if (document.getElementById('statsBars')) requestAnimationFrame(renderStats);
 }
 function renderCare(){
   const el = document.getElementById('careTimeline');
@@ -981,12 +1019,38 @@ function renderCare(){
   set('rcFeed', lastFeed ? ago(lastFeed.created_at) : '-');
   set('rcPoo', lastOf('대변') !== '-' ? lastOf('대변') : lastOf('소변'));
   set('rcSleep', lastOf('수면'));
+  const btn = document.getElementById('careDateBtn');
+  const lbl = document.getElementById('careDateLbl');
+  const prevBtn = document.getElementById('carePrevBtn');
+  if (btn) {
+    if (careViewDate) {
+      btn.classList.add('on-date');
+      if (lbl) lbl.textContent = fmtDateLbl(careViewDate);
+      if (prevBtn) prevBtn.style.display = '';
+    } else {
+      btn.classList.remove('on-date');
+      if (lbl) lbl.textContent = '오늘';
+      if (prevBtn) prevBtn.style.display = 'none';
+    }
+  }
   const byDate = {};
   CARE.forEach(c => {
     const d = (c.created_at || '').slice(0, 10);
     (byDate[d] = byDate[d] || []).push(c);
   });
-  const dates = Object.keys(byDate).sort().reverse().slice(0, 14);
+  let dates;
+  if (careViewDate) {
+    if (!byDate[careViewDate]) {
+      const dl2 = ['일','월','화','수','목','금','토'];
+      const dObj = new Date(careViewDate + 'T00:00:00');
+      const dd2 = ddayOf(careViewDate);
+      el.innerHTML = `<div class="date-head">${(dObj.getMonth() + 1)}월 ${dObj.getDate()}일 (${dl2[dObj.getDay()]}요일)</div><div class="day-summary">D${dd2 >= 0 ? '+' + dd2 : dd2} · 이 날은 기록이 없어요</div><div class="empty" style="padding:24px 16px">아래 버튼으로 이 날짜에 기록을 남겨보세요 🍼</div>`;
+      return;
+    }
+    dates = [careViewDate];
+  } else {
+    dates = Object.keys(byDate).sort().reverse().slice(0, 14);
+  }
   if (!dates.length) {
     el.innerHTML = '<div class="empty" style="padding:40px 16px">아직 기록이 없어요<br>위 버튼을 눌러 첫 기록을 남겨보세요 🍼</div>';
     return;
@@ -1041,16 +1105,28 @@ function openTimeSheet(kind){
   document.getElementById('tsTitle').textContent = careIcon(kind) + ' ' + kind + ' — 기록하기';
   document.getElementById('tsDetailRow').style.display = (kind === '모유') ? 'flex' : 'none';
   const n = new Date();
-  document.getElementById('tsDate').value = n.toISOString().slice(0, 10);
-  document.getElementById('tsHour').value = String(n.getHours()).padStart(2, '0');
-  document.getElementById('tsMin').value = String(Math.floor(n.getMinutes() / 5) * 5).padStart(2, '0');
+  const base = careViewDate || n.toISOString().slice(0, 10);
+  document.getElementById('tsDate').value = base;
+  if (careViewDate) {
+    document.getElementById('tsHour').value = '12';
+    document.getElementById('tsMin').value = '00';
+  } else {
+    document.getElementById('tsHour').value = String(n.getHours()).padStart(2, '0');
+    document.getElementById('tsMin').value = String(Math.floor(n.getMinutes() / 5) * 5).padStart(2, '0');
+  }
   document.getElementById('timeSheet').classList.add('show');
 }
 function tsNowBtn(){
   const n = new Date();
-  document.getElementById('tsDate').value = n.toISOString().slice(0, 10);
-  document.getElementById('tsHour').value = String(n.getHours()).padStart(2, '0');
-  document.getElementById('tsMin').value = String(Math.floor(n.getMinutes() / 5) * 5).padStart(2, '0');
+  const base = careViewDate || n.toISOString().slice(0, 10);
+  document.getElementById('tsDate').value = base;
+  if (careViewDate) {
+    document.getElementById('tsHour').value = '12';
+    document.getElementById('tsMin').value = '00';
+  } else {
+    document.getElementById('tsHour').value = String(n.getHours()).padStart(2, '0');
+    document.getElementById('tsMin').value = String(Math.floor(n.getMinutes() / 5) * 5).padStart(2, '0');
+  }
 }
 function closeTimeSheet(){ document.getElementById('timeSheet').classList.remove('show'); }
 function tsPickDetail(btn, d){
@@ -1084,6 +1160,12 @@ function stTab(mode){
   document.querySelectorAll('.st-tabs button').forEach((b, i) => b.classList.toggle('on', (mode === 'today' ? 0 : 1) === i));
   document.getElementById('stTodayBox').style.display = mode === 'today' ? '' : 'none';
   document.getElementById('stWeekBox').style.display = mode === 'week' ? '' : 'none';
+  stMove(0);
+}
+function stPick(key){
+  if (!key) return;
+  const diff = Math.round((new Date(key + 'T00:00:00').getTime() - new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00').getTime()) / 86400000);
+  stOffset = Math.min(0, diff);
   stMove(0);
 }
 function stMove(d){
