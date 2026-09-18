@@ -84,6 +84,7 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .cal-cell.dim{opacity:.35}
 .cal-cell.today{border:2px solid var(--pink-d)}
 .cal-cell.born{background:var(--pink);color:#fff}
+.cal-more{position:absolute;right:2px;top:2px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;font-weight:bold;border-radius:8px;padding:1px 5px;z-index:3}
 .hint{font-size:11.5px;color:var(--sub);text-align:center;margin-top:14px;line-height:1.6}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 22px;border-radius:24px;font-size:13.5px;z-index:300;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none !important;max-width:88vw;overflow:hidden;text-overflow:ellipsis}
 .toast.show{opacity:.95}
@@ -135,6 +136,12 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
 .clock-hours{display:flex;justify-content:space-between;font-size:9.5px;color:var(--sub);max-width:290px;margin:2px auto 0;padding:0 6px}
 .flow-card{background:var(--cream2);border-radius:14px;padding:12px 14px;margin-top:10px;font-size:12.5px;line-height:1.7}
 .flow-card b{color:var(--pink-d)}
+
+/* ── 앨범 필터 ── */
+.filter-row{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;-webkit-overflow-scrolling:touch}
+.filter-row::-webkit-scrollbar{display:none}
+.f-btn{flex:0 0 auto;padding:7px 14px;border:1.5px solid var(--line);border-radius:18px;background:var(--white);font-size:12px;font-weight:bold;color:var(--sub);cursor:pointer}
+.f-btn.on{border-color:var(--pink-d);background:var(--cream2);color:var(--pink-d)}
 
 /* ── 수유텀 (쑥쑥 스타일) ── */
 .dday-strip{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
@@ -253,6 +260,7 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
   <div class="welcome">
     <div class="msg" id="welcomeMsg"></div>
   </div>
+  <div class="filter-row" id="filterRow"></div>
   <div class="gallery" id="gallery"></div>
 </div>
 
@@ -454,6 +462,7 @@ input[type=date]{width:100%;padding:12px;border:2px solid var(--line);border-rad
       <button onclick="setRelation('엄마')" class="rel-btn">엄마</button>
       <button onclick="setRelation('할아버지')" class="rel-btn">할아버지</button>
       <button onclick="setRelation('할머니')" class="rel-btn">할머니</button>
+      <button onclick="setRelation('외할아버지')" class="rel-btn">외할아버지</button>
       <button onclick="setRelation('외할머니')" class="rel-btn">외할머니</button>
       <button onclick="setRelation('고모')" class="rel-btn">고모</button>
       <button onclick="setRelation('삼촌')" class="rel-btn">삼촌</button>
@@ -540,10 +549,16 @@ async function loadData(){
   } else {
     try {
       const r = await fetch(SUPA_URL + '/rest/v1/mel_photos?order=created_at.desc&limit=200', {headers: H});
-      if (r.ok) PHOTOS = await r.json();
+      if (r.ok) { PHOTOS = await r.json(); localStorage.setItem('mel_photos', JSON.stringify(PHOTOS.slice(0, 100))); }
+      else throw 0;
       const r2 = await fetch(SUPA_URL + '/rest/v1/mel_diary?order=created_at.desc&limit=200', {headers: H});
-      if (r2.ok) DIARY = await r2.json();
-    } catch (e) { /* 오프라인 폴백 */ }
+      if (r2.ok) { DIARY = await r2.json(); localStorage.setItem('mel_diary', JSON.stringify(DIARY.slice(0, 100))); }
+      else throw 0;
+    } catch (e) {
+      // 서버 장애 — 로컬 캐시 폴백 (절대 빈 앨범 보여주지 않기)
+      PHOTOS = JSON.parse(localStorage.getItem('mel_photos') || '[]');
+      DIARY = JSON.parse(localStorage.getItem('mel_diary') || '[]');
+    }
   }
   renderGallery();
 }
@@ -661,13 +676,36 @@ async function refreshDiary(){
 }
 
 // ═══════════ 렌더 ═══════════
+// ═══ 앨범 필터 ═══
+let albumFilter = '모두';
+function renderFilter(){
+  const row = document.getElementById('filterRow');
+  if (!row) return;
+  // 실제 존재하는 기록자 수집
+  const authors = [...new Set(PHOTOS.map(p => parseAuthor(p.memo).a).filter(Boolean))];
+  const order = ['모두', '아빠', '엄마', ...authors.filter(a => !['아빠','엄마'].includes(a))];
+  if (!order.includes(albumFilter)) albumFilter = '모두';
+  row.innerHTML = order.map(a => `<button class="f-btn${a === albumFilter ? ' on' : ''}" onclick="setFilter('${a}')">${a === '모두' ? '📷 모두' : (a === '아빠' ? '👨 아빠' : a === '엄마' ? '👩 엄마' : '👪 ' + a)}</button>`).join('');
+}
+function setFilter(a){
+  albumFilter = a;
+  renderFilter();
+  renderGallery();
+}
+function photosFiltered(){
+  if (albumFilter === '모두') return PHOTOS;
+  return PHOTOS.filter(p => parseAuthor(p.memo).a === albumFilter);
+}
+
 function renderGallery(){
   const g = document.getElementById('gallery');
+  renderFilter();
   if (!PHOTOS.length) {
     g.innerHTML = '<div class="empty">아직 사진이 없어요 🌱<br><b>기록</b> 탭에서 첫 사진을 올려주세요!</div>';
     return;
   }
-  g.innerHTML = PHOTOS.map((p, i) => {
+  g.innerHTML = photosFiltered().map(p => {
+    const i = PHOTOS.indexOf(p);  // 원본 인덱스 (삭제용)
     const vid = (p.image_data || '').startsWith('data:video');
     const media = vid
       ? `<video src="${p.image_data}" preload="metadata" muted></video>`
@@ -697,7 +735,12 @@ function renderCal(){
   const first = new Date(calY, calM, 1).getDay();
   const days = new Date(calY, calM + 1, 0).getDate();
   const photoMap = {};
-  PHOTOS.forEach(p => { const k = (p.photo_date || ''); if (!photoMap[k]) photoMap[k] = p.image_data; });
+  const photoCount = {};
+  PHOTOS.forEach(p => {
+    const k = (p.photo_date || '');
+    if (!photoMap[k]) photoMap[k] = p.image_data;
+    photoCount[k] = (photoCount[k] || 0) + 1;
+  });
   const today = new Date();
   let html = ['일','월','화','수','목','금','토'].map(d => `<div class="cal-dow">${d}</div>`).join('');
   for (let i = 0; i < first; i++) html += '<div class="cal-cell dim"></div>';
@@ -706,7 +749,8 @@ function renderCal(){
     const ph = photoMap[key];
     const isToday = today.getFullYear() === calY && today.getMonth() === calM && today.getDate() === d;
     const isBorn = key === '2026-09-15';
-    html += `<div class="cal-cell${isToday ? ' today' : ''}${isBorn ? ' born' : ''}" style="cursor:pointer" onclick="openDay('${key}')">${ph ? `<img class="ph" src="${ph}" loading="lazy">` : (isBorn ? '💗' : '')}<span class="n">${d}</span></div>`;
+    const extra = photoCount[key] > 1 ? `<span class="cal-more">+${photoCount[key] - 1}</span>` : '';
+    html += `<div class="cal-cell${isToday ? ' today' : ''}${isBorn ? ' born' : ''}" style="cursor:pointer" onclick="openDay('${key}')">${ph ? `<img class="ph" src="${ph}" loading="lazy">` : (isBorn ? '💗' : '')}${extra}<span class="n">${d}</span></div>`;
   }
   document.getElementById('calGrid').innerHTML = html;
 }
@@ -1232,9 +1276,11 @@ function renderStats(){
 const PROFILE_KEY = 'mel_profile', ICON_KEY = 'mel_icon';
 const MANIFEST_BASE = {name:'멜버니의 걸음마', short_name:'멜버니', description:'우리 가족만의 성장 앨범', start_url:'./', display:'standalone', orientation:'portrait', background_color:'#FDF6EE', theme_color:'#F7C8C0'};
 function getProfile(){ return localStorage.getItem('mel_relation') || localStorage.getItem(PROFILE_KEY) || ''; }
-function parseAuthor(m){ if(!m) return {a:'', t:''}; const i = m.indexOf('|'); if(i > 0 && (m.slice(0, i) === '아빠' || m.slice(0, i) === '엄마')) return {a: m.slice(0, i), t: m.slice(i + 1)}; return {a: '', t: m}; }
-function authBadge(m){ const a = parseAuthor(m).a; return a ? `<span class="tile-auth ${a === '아빠' ? 'ab' : 'em'}">${a === '아빠' ? '아' : '엄'}</span>` : ''; }
-function authChip(a){ return a ? `<span class="auth-chip ${a === '아빠' ? 'ab' : 'em'}">${a}</span>` : ''; }
+const RELATIONS = ['아빠','엄마','할아버지','할머니','외할아버지','외할머니','고모','삼촌','가족'];
+function parseAuthor(m){ if(!m) return {a:'', t:''}; const i = m.indexOf('|'); if(i > 0){ const head = m.slice(0, i); if(RELATIONS.includes(head)) return {a: head, t: m.slice(i + 1)}; } return {a: '', t: m}; }
+const REL_BADGE = {'아빠':'아','엄마':'엄','할아버지':'할A','할머니':'할B','외할아버지':'외A','외할머니':'외B','고모':'고','삼촌':'삼','가족':'가'};
+function authBadge(m){ const a = parseAuthor(m).a; return a ? `<span class="tile-auth ${a === '아빠' ? 'ab' : 'em'}">${REL_BADGE[a] || a[0]}</span>` : ''; }
+function authChip(a){ return a ? `<span class="auth-chip ${a === '아빠' ? 'ab' : a === '엄마' ? 'em' : 'ot'}">${a}</span>` : ''; }
 function updateProfileBtn(){ const b = document.getElementById('profileBtn'); if(!b) return; const p = getProfile(); b.textContent = p ? (p === '아빠' ? '👨' : '👩') : '👤'; }
 function selectProfile(a){ localStorage.setItem(PROFILE_KEY, a); updateProfileBtn(); renderProfileSel(); toast(a + ' 모드 — 이제 올리는 기록에 ' + a + ' 표시가 붙어요'); }
 function renderProfileSel(){ const p = getProfile(); ['아빠','엄마'].forEach(a => { const b = document.getElementById('pb-' + a); if(b) b.classList.toggle('on', p === a); }); }
